@@ -1,0 +1,18 @@
+﻿DONNEES POUR L'ETUDE INTRINSEQUE;;;;;;
+;;;;;;
+Tonnage de minerai geologique;Mt;11;;Investissement initial pour l'exploitation;M$;270
+Teneur du minerai geologique;g/t;3;;;;
+Taux de recuperation du gisement;%;95;;Cout par tonne remuee dans la mine a ciel ouvert;$/t roche;4
+Dilution du minerai;%;15;;Ratio sterile sur minerai dans la mine a ciel ouvert;;4
+;;;;Cout d'exploitation par tonne de minerai;$/t minerai;20
+Tonnage de minerai industriel;Mt;12.02;;Cout de traitement par tonne de minerai;$/t minerai;15
+Teneur du minerai industriel;%;2.61;;Charges fixes annuelles;M$/an;18
+;;;;;;
+Rythme de production annuelle de minerai;Mt/an;0.8;;Prix de vente de l'or;$/oz;1400
+Premiere annee de production;Année;1;;Taux de recuperation de l'or dans le traitement;%;95
+;;;;Proportion d'or paye dans le dore;%;98
+;;;;Quantite d'or payee par tonne de minerai;g;2.43
+;;;;Nombre de grammes dans une once;;31
+;;;;Recette par tonne de minerai;$/t minerai;109.68
+;;;;;;
+;;;;Taux d'actualisation;%;5
