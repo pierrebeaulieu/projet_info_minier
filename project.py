@@ -121,8 +121,7 @@ def extraction_csv(nom_fichier, n):
     entree["dilution_minerai"] = dilution_minerai
     entree["rythme_prod_annee"] = rythme_prod_annee
     entree["premiere_annee_prod"] = premiere_annee_prod
-    print(rythme_prod_annee)
-
+  
     return entree
 
 
@@ -149,10 +148,9 @@ class entree:
     def __repr__(self):
         return f"** investissement initiale pour l'exploitation ** : {self.investissement[0]} M$  , \n \n  ** prix de l'or ** = {self.prix_or[0]} $/oz, \n \
             \n ** Ratio sterile sur minerai dans la mine à ciel ouvert ** = {self.ratio_sterile[0]},\n \
-     \n  ** Teneur du minerai geologique ** = {self.teneur_minerai_geol[0]} g/t,  \n \n  ** Taux de récuperation du gisement ** = {self.taux_recup[0]} %,\n \n ** Dilution du minerai ** = {self.dilution_minerai[0]}, \n \n  **  Rythme de production annuelle de minerai ** = {self.rythme_prod_annee[0]} Mt/an,\n \n ** Coût par tonne remuee dans la mine à ciel ouvert ** = {self.cout_tonne_remuee[0]} $/t roche, \n \n ** Taux d'actualisation ** = {self.taux_actualisation[0]} %."
+     \n  ** Teneur du minerai geologique ** = {self.teneur_minerai_geol[0]} g/t,  \n \n  ** Taux de récuperation du gisement ** = {self.taux_recup[0]} %,\n \n ** Dilution du minerai ** = {self.dilution_minerai[0]}, \n \n  **  Rythme de production annuelle de minerai ** = {self.rythme_prod_annee[0]} Mt/an,\n \n ** Coût par tonne remuee dans la mine à ciel ouvert ** = {self.cout_tonne_remuee[0]} $/t roche, \n \n ** Taux d'actualisation ** = {self.taux_actualisation[0]} % \n \n ** Charges fixes annuelles ** = {self.charges_fixes[0]} M$/an. "
 
     def cout_exploitation_tonne_minerai(self):
-        print(self.cout_tonne_remuee.shape)
         return self.cout_tonne_remuee * (self.ratio_sterile + np.ones(self.n))
 
     def teneur_minerai_industriel(self):
@@ -183,7 +181,9 @@ class entree:
         return self.rythme_prod_annee * self.recette_tonne_minerai()
 
     def cash_flow(self):
-        return self.recette() - self.dep_operatoiresTotale() - self.cout_traitement
+        cash = self.recette() - self.dep_operatoiresTotale() - self.cout_traitement
+        cash[0] -= self.investissement[0]
+        return cash
 
 # investissement pas pris en compte, revoir formule
 
@@ -333,6 +333,7 @@ if st.checkbox("Voir les données d'entrées"):
 
 #détermine le nombre de paramètre à modifier
 u = st.number_input("nombre d'entrées à modifier", 1,5,step=1)
+annees = st.number_input("nombre d'années considérées", 0, 50, 15)
 
 st.markdown(
     "### Dans un premier temps, on veut déterminer la conséquence de la modification de chaque paramètre d'entrée toute chose égale par ailleurs ### \n  \n \n  ")
@@ -345,10 +346,10 @@ def user_input(k):
         coeff[i] = st.slider(
         f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
         entre[i] = st.selectbox(f'paramètres {i+1} avec incertitude', ["investissement", "cout_tonne_remuee", "ratio_sterile", "cout_traitement", "charges_fixes", "prix_or", "taux_recuperation_or",
-                                                                      "prop_or_paye_dore", "nombre_grammes_once", "taux_actualisation", "tonnage_geol", "teneur_minerai_geol", "taux_recup", "dilution_minerai", "rythme_prod_annee", "premiere_annee_prod"], index=1)
+                                                                      "prop_or_paye_dore", "taux_actualisation", "tonnage_geol", "teneur_minerai_geol", "taux_recup", "dilution_minerai", "rythme_prod_annee", "premiere_annee_prod"], index=1)
         data[f"coefficient{i+1}"] = coeff[i]
         data[f"entrees{i+1}"] = entre[i]
-    annees = st.sidebar.number_input("nombre d'années considérées", 0, 50, 15)
+    
 
     
     options = st.selectbox("Résultat", ['cash_flow_actu'])
@@ -378,11 +379,11 @@ valeurs = entree(extraction_csv("donnees_entree_proj_minier.csv", n))
 st.write(df)
 
 
-abscisse = np.arange(n)
+abscisse = np.arange(1,n)
 fig, ax = plt.subplots()
 plt.style.use('seaborn')  # pour avoir un autre style de graphique plus frais
 evaluable = "valeurs."+f"{sortie_voulue}"+"()"
-sortie = eval(evaluable)
+sortie = eval(evaluable)[1:]
 st.write(f" Le cumul des cash flow avec les données initiales vaut {valeurs.cumul_cash_flow_actu()[-1] :.2f} M$ après l'année {n-1}")
 #tracé avec les valeurs initiales
 ax = plt.scatter(abscisse, sortie,
@@ -403,7 +404,7 @@ for i in range(u):
     changement = eval(change)
     st.markdown(
     f" Le cumul des cash flow avec {entree_modif} modifiées vaut {valeur.cumul_cash_flow_actu()[-1] :.2f} M$ après l'année {n-1} ")
-    sortie_modif = eval("valeur."+f"{sortie_voulue}"+"()")
+    sortie_modif = eval("valeur."+f"{sortie_voulue}"+"()")[1:]
     
     ax = plt.scatter(abscisse, sortie_modif,
                  label=f"{entree_modif} modifiée")
@@ -415,5 +416,41 @@ plt.title(f"{sortie_voulue}")
 plt.legend()
 
 st.pyplot(fig)
+
+
+
+st.markdown("## Analyse de sensibilité ##")
+
+p = st.number_input("nombre d'années d'exploitation", 1, 30, 15)
+
+#on détermine les entrées avec le bon nombre d'années considérées
+valeurs = entree(extraction_csv("donnees_entree_proj_minier.csv", p))
+
+
+pourcentage = np.linspace(0.5, 1.5, 100)
+
+
+fig, ax = plt.subplots(figsize  = (15,10))
+
+
+
+for variable in ["investissement", "cout_tonne_remuee", "ratio_sterile", "cout_traitement", "prix_or", "taux_recuperation_or", "prop_or_paye_dore", "taux_actualisation", "tonnage_geol", "teneur_minerai_geol", "taux_recup", "dilution_minerai", "rythme_prod_annee", "premiere_annee_prod"]:
+    sortie = []
+    for pourcent in pourcentage:
+        valeur = deepcopy(valeurs)
+        params_modif = eval(f"valeur.{variable}")
+        params_modif *= pourcent
+        sortie.append(eval("valeur."+"cumul_cash_flow_actu"+"()")[-1])
+    plt.plot(pourcentage, sortie, label = f"{variable}")
+
+plt.xlabel('pourcentage')
+plt.ylabel('cumul cash flow actualisé')
+plt.title('variation du cumul du cash flow actualisée selon le pourcentage et selon les variables modifiées')
+plt.legend()
+st.pyplot(fig)
+    
+
+
+
 
 
