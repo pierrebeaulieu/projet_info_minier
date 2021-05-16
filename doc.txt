@@ -1,0 +1,8 @@
+si a augmente de 1%, alors x diminue de 12%. Faire des approximations au 1er ordre.
+Faire de la différenciation automatique.
+On veut des variations relatives 
+Faire une fonction qui prend en entrée un pourcentage (1% par défaut), une entree et une sortie. Calculer des dérivées partielles (1er ordre).
+
+Pour le client final, faire simple, bout de formulaires et paramètres à ajuster.
+
+utiliser des dashboard à la streamlit.
