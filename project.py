@@ -219,114 +219,62 @@ class entree:
         return sortie
 
     def dri(self):
-        somme = 0
-        i = 0
-        produit = 1
-        while somme < 0 or i == 0:
-            produit = produit*(1+self.taux_actualisation[i])
-            somme += (self.recette()[i] - self.dep_operatoiresTotale()
-                      [i] - self.investissement[i]) / produit
-
-        return i
+        cumul = self.cumul_cash_flow_actu()
+        dr = 0
+        while dr < self.n:
+            if cumul[dr] >= 0:
+                return dr
+            else:
+                dr += 1
+        return -1         # -1 pour signaler que le délai de retour n'est jamais atteint
 
     def tri(self):
-        a = 0
-        b = 0.5
-        c = (a+b)/2
-        epsilon = 0.01
+        N = self.n
+        Tri=[]
+        CF = self.cash_flow()
+        for i in range(N):
+            a = 0.0
+            b = 0.35
+            c = (a+b)/2
+            epsilon = 0.1
+            k = 0 #nombre itération
+            p = 100
+            def f(x):
+                taux = np.zeros(self.n) #initialisation
+                for k in range(N):
+                    taux[k] = 1/(1+x)**k
+                actu = taux * CF
+                return np.sum(actu[:i])
+            if f(b)*f(a) < 0:
+                while abs(f(c)) > epsilon and k <p:
+                    if f(c)*f(a) > 0 : 
+                        a = c
+                        c = (b+c)/2
 
-        def f(a):
-            somme = 0
-            produit = 1
-            for i in range(len(self.recette())):
-                produit = produit*(1+self.taux_actualisation[i])
-                somme += (self.recettes()[i] - self.dep_operatoiresTotale()
-                          [i] - self.investissement[i]) / produit
-            return(somme)
+                    else :
+                        b = c 
+                        c= (a+c)/2
+                    k += 1
+                tri = c
+                Tri.append(tri)
+            else : Tri.append(0)
+        return Tri
 
 
-'''
-        while abs(f(c)) > epsilon:
-            if f(c) > 0:
-                if f(a) < 0:
-                    c = (a+c)/2
-                elif:
-                    c = (b+c)/2
-                elif f(a) > 0:
-                    c = (a+c)/2
-            else:
-                c = (b+c)/2
-                
-        return c
-
-     
-#rajouiter variable N
-class Calcul:  #dernière classe, avant il faut déterminer tous les pramamètres (production, prix/tonneminerai, etc...)
-    def __init__(self, params):
-        self.production = params.get('production')
-        self.recette_tonne_minerai = params.get('recette minerai tonne minerai')
-        self.charges_fixe = params.get('charges fixe')
-        self.traitement = params.get('traitement')
-        self.exploitation = pramas.get('exploitation')
-        self.remue = params.get('remue')
-        self.investissement = params.get('investissement')
-    
-    def recette(self):
-        return self.production * self.recette_minerai
-
-    
-#année de benefice
-
-    somme = 0
-    i = 0
-    produit = 1
-    while somme < 0 or i == 0:
-        produit = produit*(1+taux_actualisation[i])
-        somme +=  (recettes[i] - depenses[i] - investissement[i]) / produit
-
-    return i
-
-    #pour le tri
-
-    a = 0
-    b = 0.5
-    c = (a+b)/2
-    epsilon = 0.01
-    def f(a):
-        somme = 0
-        produit = 1
-        for i in range(len(recettes)):
-            produit = produit*(1+taux_actualisation[i])
-            somme +=  (recettes[i] - depenses[i] - investissement[i]) / produit
-        return(somme)
-
-    while abs(f(c)) > epsilon:
-        if f(c) > 0:
-            if f(a) < 0:
-                c = (a+c)/2
-            else:
-                c = (b+c)/2
-            elif f(a) > 0:
-                c = (a+c)/2
-        else:
-            c = (b+c)/2
-
-    tri = c
-    
-#graphe
-
-l = np.array(len(recettes))
-for i in range(l):
-    l[i] = i+1
-f1 = plt.figure()
-plt.plot(l,nom.cash_flow_actu())
-'''
 n=1
 # on extrait les données du tableau de base et modifie en fonction du choix du client
 valeurs = entree(extraction_csv("donnees_entree_proj_minier.csv", n))
 
 
-if st.checkbox("Voir les données d'entrées"):
+
+st.markdown("# Projet informatique sur l'économie d'une exploitation minière # ")
+
+st.text(" ")   # Pour sauter une ligne, sinon le texte se superpose
+st.text(" ")
+st.text(' ')
+
+
+if st.checkbox("Voir les données d'entrées", value = True): 
     st.subheader("Données d'entrée")
     st.markdown(valeurs)
 
@@ -343,22 +291,19 @@ def user_input(k):
     entre = [1,2,3,4,5,6]
     data = dict()
     for i in range(k):
-        coeff[i] = st.slider(
-        f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
         entre[i] = st.selectbox(f'paramètres {i+1} avec incertitude', ["investissement", "cout_tonne_remuee", "ratio_sterile", "cout_traitement", "charges_fixes", "prix_or", "taux_recuperation_or",
                                                                       "prop_or_paye_dore", "taux_actualisation", "tonnage_geol", "teneur_minerai_geol", "taux_recup", "dilution_minerai", "rythme_prod_annee", "premiere_annee_prod"], index=1)
+        coeff[i] = st.slider(
+        f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
         data[f"coefficient{i+1}"] = coeff[i]
         data[f"entrees{i+1}"] = entre[i]
     
 
     
-    options = st.selectbox("Résultat", ['cash_flow_actu'])
-    # options = st.sidebar.multiselect('paramètres avec incertitude', ["coût de l'or", "Tonnage de minerai geologique", "Teneur du minerai geologique", "Taux de recuperation du gisement", "Dilution du minerai", "Tonnage de minerai industriel", "Teneur du minerai industriel", "Rythme de production annuelle de minerai", "Cout par tonne remuee dans la mine a ciel ouvert",
-    #                                                              "Ratio sterile sur minerai dans la mine a ciel ouvert", "Cout d'exploitation par tonne de minerai", "Cout de traitement par tonne de minerai", "Charges fixes annuelles", "Prix de vente de l'or", "Taux de recuperation de l'or dans le traitement", "Proportion d'or paye dans le dore", "Quantite d'or payee par tonne de minerai", "Taux d'actualisation", "Recette par tonne de minerai"])
+    options = st.selectbox("Résultat", ['cash_flow_actu', 'tri'], )
     data['options']=  options
     data['annees'] = annees 
-    parametres = pd.DataFrame(
-        data, index=["1ère valeure modifiée"])
+    parametres = pd.DataFrame(data, index=["1ère valeure modifiée"])
     return parametres
 
 
@@ -374,12 +319,10 @@ n = df.loc['1ère valeure modifiée', 'annees'] + 1
 valeurs = entree(extraction_csv("donnees_entree_proj_minier.csv", n))
 
 
+st.write(df) # à enlever à la fin mais permet de visualiser le tableau
 
 
-st.write(df)
-
-
-abscisse = np.arange(1,n)
+abscisse = np.arange(1,n) #on fait partir à 1 car pour l'année 0, seulement investissement initiale
 fig, ax = plt.subplots()
 plt.style.use('seaborn')  # pour avoir un autre style de graphique plus frais
 evaluable = "valeurs."+f"{sortie_voulue}"+"()"
@@ -407,7 +350,10 @@ for i in range(u):
     sortie_modif = eval("valeur."+f"{sortie_voulue}"+"()")[1:]
     
     ax = plt.scatter(abscisse, sortie_modif,
-                 label=f"{entree_modif} modifiée")
+                 label=f"{entree_modif} modifiée facteur {coeff}")
+
+
+
 
 
 plt.ylabel('$ (en millions) ')
@@ -418,6 +364,7 @@ plt.legend()
 st.pyplot(fig)
 
 
+#partie visualisation des tendances liées aux modifications de paramètres
 
 st.markdown("## Analyse de sensibilité ##")
 
