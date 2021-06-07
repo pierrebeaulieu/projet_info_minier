@@ -265,15 +265,93 @@ n=15
 # on extrait les données du tableau de base et modifie en fonction du choix du client
 valeurs = entree(extraction_csv("donnees_entree_proj_minier.csv", n))
 
+valeurs_non_modif = deepcopy(valeurs)
+
 # On modélise la loi de probabilité de l'investissement en tenant compte du choix du client
 centre_triang = st.number_input(f"L'investissement est modélisé par une loi triangulaire centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
-bande = st.number_input(f"Pourcentage de la bande:", 1, 50, 10, 1)
-st.write(f'On considère donc une loi triangulaire centrée sur {centre_triang}M$ et de bande {bande}%')
+bande_triang = st.number_input("Pourcentage de la bande de l'investissement:", 1, 50, 10, 1)
+st.write(f'On considère donc une loi triangulaire centrée sur {centre_triang}M$ et de bande {bande_triang}%')
 
-arr = np.random.triangular(centre_triang - centre_triang*bande/100, centre_triang, centre_triang + centre_triang*bande/100, size=10000)
+arr = np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, size=10000)
 fig, ax = plt.subplots()
 ax.hist(arr, bins=200)
 st.pyplot(fig)
 
-valeurs.investissement = np.random.triangular(centre_triang - centre_triang*bande/100, centre_triang, centre_triang + centre_triang*bande/100, 15)
+valeurs.investissement = np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, 15)
 st.write("Les nouvelles valeurs pour l'investissement sont (pour une simulation):", valeurs.investissement)
+
+# On modélise la loi de probabilité du coût total par une loi uniforme
+centre_unif = st.number_input(f"Le coût est modélisé par une loi uniforme centrée sur la valeur {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
+bande_unif = st.number_input("Pourcentage de la bande du coût:", 1, 50, 10, 1)
+st.write(f'On considère donc une loi uniforme centrée sur {centre_triang}$/t et de bande {bande_unif}%')
+
+valeurs.cout_tonne_remuee = np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200, 15)
+
+# La teneur suit une loi normale
+moyenne_teneur = st.number_input(f"La teneur est modélisée par une loi normale de moyenne {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+ecart_type = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne de la teneur", 1/10)
+st.write(f"On considère donc une loi normale de moyenne {moyenne_teneur} et d'ecart_type {ecart_type}")
+
+valeurs.teneur_minerai_geol = np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur, 15)
+
+# De même pour le tonnage
+moyenne_tonnage = st.number_input(f"Le tonnage est modélisé par une loi normale de moyenne {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.tonnage_geol[0])
+ecart_type = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne du tonnage", 1/10)
+st.write(f"On considère donc une loi normale de moyenne {moyenne_tonnage} et d'ecart_type {ecart_type}")
+
+valeurs.tonnage_geol = np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage, 15)
+
+# On trace la sortie voulue du client
+
+sortie_voulue = st.selectbox("Résultat", ['cash_flow_actu', 'tri'], ) 
+
+abscisse = np.arange(1, n)
+fig, ax = plt.subplots()
+plt.style.use('seaborn')
+evaluable = "valeurs."+f"{sortie_voulue}"+"()"
+sortie = eval(evaluable)[1:]
+ax = plt.scatter(abscisse, sortie,
+                 label=f"valeur issue d'une seule simulation")
+
+plt.ylabel('$ (en millions) ')
+plt.xlabel("annee")
+plt.title(f"{sortie_voulue}")
+plt.legend()
+
+st.pyplot(fig)
+
+# On fait maintenant de même pour un grand nombre de simulations
+
+st.write("Voyons maintenant ce que ça donne sur un grand nombre de simulations")
+
+# On demande le nombre de simulations 
+
+nb_simu = st.number_input("Nombre de simulations", 1, 10000, 1000, 1)
+
+
+i = 1
+
+while i < nb_simu:
+    i+=1
+    valeurs.investissement += np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, 15)
+    valeurs.cout_tonne_remuee += np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200, 15)
+    valeurs.tonnage_geol += np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage, 15)
+    valeurs.teneur_minerai_geol += np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur, 15)
+
+valeurs.investissement *= 1/nb_simu
+valeurs.cout_tonne_remuee *= 1/nb_simu
+valeurs.tonnage_geol *= 1/nb_simu
+valeurs.teneur_minerai_geol *= 1/nb_simu
+
+fig, ax = plt.subplots()
+plt.style.use('seaborn')
+sortie = eval(evaluable)[1:]
+ax = plt.scatter(abscisse, sortie,
+                 label=f"valeur moyenne issue d'un grand nombre de simulations")
+
+plt.ylabel('$ (en millions) ')
+plt.xlabel("annee")
+plt.title(f"{sortie_voulue}")
+plt.legend()
+
+st.pyplot(fig)
