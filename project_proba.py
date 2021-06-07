@@ -303,7 +303,7 @@ valeurs.tonnage_geol = np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonn
 
 # On trace la sortie voulue du client
 
-sortie_voulue = st.selectbox("Résultat", ['cash_flow_actu', 'tri'], ) 
+sortie_voulue = st.selectbox("Résultat", ['cash_flow_actu', 'cumul_cash_flow', 'tri'], ) 
 
 abscisse = np.arange(1, n)
 fig, ax = plt.subplots()
@@ -346,8 +346,15 @@ valeurs.teneur_minerai_geol *= 1/nb_simu
 fig, ax = plt.subplots()
 plt.style.use('seaborn')
 sortie = eval(evaluable)[1:]
+
+evaluable_non_modif = "valeurs_non_modif."+f"{sortie_voulue}"+"()"
+sortie_non_modif = eval(evaluable_non_modif)[1:]
 ax = plt.scatter(abscisse, sortie,
                  label=f"valeur moyenne issue d'un grand nombre de simulations")
+
+ax = plt.scatter(abscisse, sortie_non_modif,
+                 label=f"réalisation à partir des valeurs déterministes")
+
 
 plt.ylabel('$ (en millions) ')
 plt.xlabel("annee")
@@ -355,3 +362,56 @@ plt.title(f"{sortie_voulue}")
 plt.legend()
 
 st.pyplot(fig)
+
+st.write("On vérifie bien que la moyenne issue des simulations coïncide étroitement avec le calcul déterministe")
+
+# Demandons maintenant un TRI objectif
+
+st.header('Statistiques de rentabilité interne')
+
+tri_goal = st.number_input("Objectif de TRI", 0.005, 0.5, 0.05, 0.005)
+annee = st.number_input("A l'année:", 1, 15, 15, 1)
+
+i = 0
+iter_tri = 0
+
+while i < nb_simu:
+    i+=1
+    valeurs.investissement = np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, 15)
+    valeurs.cout_tonne_remuee = np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200, 15)
+    valeurs.tonnage_geol = np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage, 15)
+    valeurs.teneur_minerai_geol = np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur, 15)
+    # pour la proba que tri>tri_goal
+    if valeurs.tri()[annee-1] > tri_goal:
+        iter_tri += 1
+
+iter_tri *= 1/nb_simu
+
+st.write(f"La probabilité que le TRI soit supérieur à {tri_goal} à l'année {annee} vaut {iter_tri}")
+
+# Calculons alors le risque de rentabilité du projet
+
+st.header("Risque de rentabilité de l'investissement")
+
+i = 0
+iter_van = 0
+annee = st.number_input("Caculons la probabilité que l'investissement ne soit pas rentable à l'année:", 1, 15, 15, 1)
+esperance_perte = 0
+
+while i < nb_simu:
+    i+=1
+    valeurs.investissement = np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, 15)
+    valeurs.cout_tonne_remuee = np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200, 15)
+    valeurs.tonnage_geol = np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage, 15)
+    valeurs.teneur_minerai_geol = np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur, 15)
+    # pour la proba que van<0
+    if valeurs.cumul_cash_flow()[annee-1] < 0:
+        iter_van += 1
+        esperance_perte += valeurs.cumul_cash_flow()[annee-1]
+
+esperance_perte *= 1/nb_simu
+iter_van *= 1/nb_simu
+
+st.write(f"La probabilité que le VAN soit négatif à l'année {annee} vaut {iter_van}")
+
+st.write(f"De plus, l'espérance de perte à l'année {annee} vaut {esperance_perte}M$")
