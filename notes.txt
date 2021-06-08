@@ -1,0 +1,7 @@
+drag and drop avec streamlit ou on dépose le csv
+avec une methode d'export de streamlit
+on calcul le gradient au point d'interet pour avoir l'approximation linéarisé
+si au lieu de changer les paramètres 1 par 1, on veut calculer le cashflow, est ce qu'il prend du numpy ?
+revoir le 0 de la fonction tri
+demander une subscription streamlit
+identifcation de distribution : scipy.stats.gaussian_kde
