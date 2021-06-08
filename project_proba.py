@@ -277,7 +277,7 @@ fig, ax = plt.subplots()
 ax.hist(arr, bins=200)
 st.pyplot(fig)
 
-valeurs.investissement = np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, 15)
+valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
 st.write("Les nouvelles valeurs pour l'investissement sont (pour une simulation):", valeurs.investissement)
 
 # On modélise la loi de probabilité du coût total par une loi uniforme
@@ -285,21 +285,21 @@ centre_unif = st.number_input(f"Le coût est modélisé par une loi uniforme cen
 bande_unif = st.number_input("Pourcentage de la bande du coût:", 1, 50, 10, 1)
 st.write(f'On considère donc une loi uniforme centrée sur {centre_triang}$/t et de bande {bande_unif}%')
 
-valeurs.cout_tonne_remuee = np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200, 15)
+valeurs.cout_tonne_remuee = np.array(n * [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
 
 # La teneur suit une loi normale
 moyenne_teneur = st.number_input(f"La teneur est modélisée par une loi normale de moyenne {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
 ecart_type = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne de la teneur", 1/10)
 st.write(f"On considère donc une loi normale de moyenne {moyenne_teneur} et d'ecart_type {ecart_type}")
 
-valeurs.teneur_minerai_geol = np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur, 15)
+valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur)])
 
 # De même pour le tonnage
 moyenne_tonnage = st.number_input(f"Le tonnage est modélisé par une loi normale de moyenne {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.tonnage_geol[0])
 ecart_type = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne du tonnage", 1/10)
 st.write(f"On considère donc une loi normale de moyenne {moyenne_tonnage} et d'ecart_type {ecart_type}")
 
-valeurs.tonnage_geol = np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage, 15)
+valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
 
 # On trace la sortie voulue du client
 
@@ -328,15 +328,15 @@ st.write("Voyons maintenant ce que ça donne sur un grand nombre de simulations"
 
 nb_simu = st.number_input("Nombre de simulations", 1, 10000, 1000, 1)
 
-
+st.write(valeurs.cout_tonne_remuee)
 i = 1
 
 while i < nb_simu:
     i+=1
-    valeurs.investissement += np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, 15)
-    valeurs.cout_tonne_remuee += np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200, 15)
-    valeurs.tonnage_geol += np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage, 15)
-    valeurs.teneur_minerai_geol += np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur, 15)
+    valeurs.investissement += np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
+    valeurs.cout_tonne_remuee += np.array(n* [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
+    valeurs.tonnage_geol += np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
+    valeurs.teneur_minerai_geol += np.array(n * [np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur)])
 
 valeurs.investissement *= 1/nb_simu
 valeurs.cout_tonne_remuee *= 1/nb_simu
@@ -377,10 +377,11 @@ iter_tri = 0
 
 while i < nb_simu:
     i+=1
-    valeurs.investissement = np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, 15)
-    valeurs.cout_tonne_remuee = np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200, 15)
-    valeurs.tonnage_geol = np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage, 15)
-    valeurs.teneur_minerai_geol = np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur, 15)
+    valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
+    valeurs.cout_tonne_remuee = np.array(n* [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
+    valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
+    valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur)])
+
     # pour la proba que tri>tri_goal
     if valeurs.tri()[annee-1] > tri_goal:
         iter_tri += 1
@@ -400,10 +401,11 @@ esperance_perte = 0
 
 while i < nb_simu:
     i+=1
-    valeurs.investissement = np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, 15)
-    valeurs.cout_tonne_remuee = np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200, 15)
-    valeurs.tonnage_geol = np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage, 15)
-    valeurs.teneur_minerai_geol = np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur, 15)
+    valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
+    valeurs.cout_tonne_remuee = np.array(n* [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
+    valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
+    valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur)])
+
     # pour la proba que van<0
     if valeurs.cumul_cash_flow()[annee-1] < 0:
         iter_van += 1
@@ -414,4 +416,4 @@ iter_van *= 1/nb_simu
 
 st.write(f"La probabilité que le VAN soit négatif à l'année {annee} vaut {iter_van}")
 
-st.write(f"De plus, l'espérance de perte à l'année {annee} vaut {esperance_perte}M$")
+st.write(f"De plus, l'espérance de perte à l'année {annee} vaut {esperance_perte }M$")
