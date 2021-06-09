@@ -267,7 +267,12 @@ valeurs = entree(extraction_csv("donnees_entree_proj_minier.csv", n))
 
 valeurs_non_modif = deepcopy(valeurs)
 
+st.header("Modélisation des lois de probabilité des paramètres incertains")
+
 # On modélise la loi de probabilité de l'investissement en tenant compte du choix du client
+
+st.subheader("Loi de probabilité suivie par l'investissement")
+
 centre_triang = st.number_input(f"L'investissement est modélisé par une loi triangulaire centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
 bande_triang = st.number_input("Pourcentage de la bande de l'investissement:", 1, 50, 10, 1)
 st.write(f'On considère donc une loi triangulaire centrée sur {centre_triang}M$ et de bande {bande_triang}%')
@@ -281,6 +286,9 @@ valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - cent
 st.write("Les nouvelles valeurs pour l'investissement sont (pour une simulation):", valeurs.investissement)
 
 # On modélise la loi de probabilité du coût total par une loi uniforme
+
+st.subheader("Loi de probabilité suivie par le coût")
+
 centre_unif = st.number_input(f"Le coût est modélisé par une loi uniforme centrée sur la valeur {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
 bande_unif = st.number_input("Pourcentage de la bande du coût:", 1, 50, 10, 1)
 st.write(f'On considère donc une loi uniforme centrée sur {centre_triang}$/t et de bande {bande_unif}%')
@@ -288,6 +296,9 @@ st.write(f'On considère donc une loi uniforme centrée sur {centre_triang}$/t e
 valeurs.cout_tonne_remuee = np.array(n * [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
 
 # La teneur suit une loi normale
+
+st.subheader("Loi de probabilité suivie par la teneur en minerai")
+
 moyenne_teneur = st.number_input(f"La teneur est modélisée par une loi normale de moyenne {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
 ecart_type = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne de la teneur", 1/10)
 st.write(f"On considère donc une loi normale de moyenne {moyenne_teneur} et d'ecart_type {ecart_type}")
@@ -295,6 +306,9 @@ st.write(f"On considère donc une loi normale de moyenne {moyenne_teneur} et d'e
 valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur)])
 
 # De même pour le tonnage
+
+st.subheader("Loi de probabilité suivie par le tonnage")
+
 moyenne_tonnage = st.number_input(f"Le tonnage est modélisé par une loi normale de moyenne {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.tonnage_geol[0])
 ecart_type = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne du tonnage", 1/10)
 st.write(f"On considère donc une loi normale de moyenne {moyenne_tonnage} et d'ecart_type {ecart_type}")
@@ -302,6 +316,8 @@ st.write(f"On considère donc une loi normale de moyenne {moyenne_tonnage} et d'
 valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
 
 # On trace la sortie voulue du client
+
+st.header("Analyse des résultats avec ces nouvelles lois")
 
 sortie_voulue = st.selectbox("Résultat", ['cash_flow_actu', 'cumul_cash_flow', 'tri'], ) 
 
@@ -328,7 +344,6 @@ st.write("Voyons maintenant ce que ça donne sur un grand nombre de simulations"
 
 nb_simu = st.number_input("Nombre de simulations", 1, 10000, 1000, 1)
 
-st.write(valeurs.cout_tonne_remuee)
 i = 1
 
 while i < nb_simu:
