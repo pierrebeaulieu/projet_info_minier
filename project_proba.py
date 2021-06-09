@@ -273,17 +273,28 @@ def app():
 
     st.subheader("Loi de probabilité suivie par l'investissement")
 
-    centre_triang = st.number_input(f"L'investissement est modélisé par une loi triangulaire centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
-    bande_triang = st.number_input("Pourcentage de la bande de l'investissement:", 1, 50, 10, 1)
-    st.write(f'On considère donc une loi triangulaire centrée sur {centre_triang}M$ et de bande {bande_triang}%')
+    loi_invest = st.selectbox("loi de l'investissement", ['triangular', 'normal', 'uniform'])
 
-    arr = np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, size=10000)
-    fig, ax = plt.subplots()
-    ax.hist(arr, bins=200)
-    st.pyplot(fig)
+    if loi_invest == "triangular":
+        centre_triang = st.number_input(f"L'investissement est modélisé par une loi triangulaire centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
+        bande_triang = st.number_input("Pourcentage de la bande de l'investissement:", 1, 50, 10, 1)
+        st.write(f'On considère donc une loi triangulaire centrée sur {centre_triang}M$ et de bande {bande_triang}%')
 
-    valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
-    st.write("Les nouvelles valeurs pour l'investissement sont (pour une simulation):", valeurs.investissement)
+        arr = np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100, size=10000)
+        fig, ax = plt.subplots()
+        ax.hist(arr, bins=200)
+        st.pyplot(fig)
+
+        valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
+        st.write("Les nouvelles valeurs pour l'investissement sont (pour une simulation):", valeurs.investissement)
+
+    if loi_invest == "normal":
+        moyenne_invest = st.number_input(f"L'investissement est modélisée par une loi normale de moyenne {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+        ecart_type = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne de la teneur", 1/10)
+        st.write(f"On considère donc une loi normale de moyenne {moyenne_invest} et d'ecart_type {ecart_type}")
+
+        valeurs.investissement = np.array(n * [np.random.normal(moyenne_invest, ecart_type*moyenne_invest)])
+
 
     # On modélise la loi de probabilité du coût total par une loi uniforme
 
@@ -291,7 +302,7 @@ def app():
 
     centre_unif = st.number_input(f"Le coût est modélisé par une loi uniforme centrée sur la valeur {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
     bande_unif = st.number_input("Pourcentage de la bande du coût:", 1, 50, 10, 1)
-    st.write(f'On considère donc une loi uniforme centrée sur {centre_triang}$/t et de bande {bande_unif}%')
+    st.write(f'On considère donc une loi uniforme centrée sur {centre_unif}$/t et de bande {bande_unif}%')
 
     valeurs.cout_tonne_remuee = np.array(n * [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
 
@@ -345,6 +356,7 @@ def app():
     nb_simu = st.number_input("Nombre de simulations", 1, 10000, 1000, 1)
 
     i = 1
+    
 
     while i < nb_simu:
         i+=1
