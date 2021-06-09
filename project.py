@@ -379,9 +379,9 @@ def app():
 
     fig, ax = plt.subplots(figsize  = (15,10))
 
+    variable = st.multiselect("Variable à analyser",["investissement", "cout_tonne_remuee", "ratio_sterile", "cout_traitement", "charges_fixes", "prix_or", "taux_recuperation_or","prop_or_paye_dore", "taux_actualisation", "tonnage_geol", "teneur_minerai_geol", "taux_recup", "dilution_minerai", "rythme_prod_annee", "premiere_annee_prod"])
 
-
-    for variable in ["taux_actualisation"]:
+    for variable in variable:
         sortie = []
         for pourcent in pourcentage:
             valeur = deepcopy(valeurs)
