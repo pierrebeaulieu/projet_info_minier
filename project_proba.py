@@ -357,7 +357,7 @@ def app():
 
     i = 1
     
-
+    evaluable_invest = "np.random." + loi_invest
     while i < nb_simu:
         i+=1
         valeurs.investissement += np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
@@ -401,9 +401,9 @@ def app():
 
     i = 0
     iter_tri = 0
+    tri_simu = np.zeros(nb_simu)
 
     while i < nb_simu:
-        i+=1
         valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
         valeurs.cout_tonne_remuee = np.array(n* [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
         valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
@@ -412,6 +412,15 @@ def app():
         # pour la proba que tri>tri_goal
         if valeurs.tri()[annee-1] > tri_goal:
             iter_tri += 1
+        tri_simu[i] = valeurs.tri()[annee-1]
+        i+=1
+
+    # On affiche la répartition des valeurs du TRI à l'aide d'un histogramme
+
+    fig, ax = plt.subplots()
+    ax.hist(tri_simu, bins=25)
+    plt.title(f"Répartition des valeurs du TRI à l'année {annee}")
+    st.pyplot(fig)
 
     iter_tri *= 1/nb_simu
 
@@ -425,9 +434,9 @@ def app():
     iter_van = 0
     annee = st.number_input("Caculons la probabilité que l'investissement ne soit pas rentable à l'année:", 1, 15, 15, 1)
     esperance_perte = 0
+    van_simu = np.zeros(nb_simu)
 
     while i < nb_simu:
-        i+=1
         valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
         valeurs.cout_tonne_remuee = np.array(n* [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
         valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
@@ -437,9 +446,18 @@ def app():
         if valeurs.cumul_cash_flow()[annee-1] < 0:
             iter_van += 1
             esperance_perte += valeurs.cumul_cash_flow()[annee-1]
-
+        van_simu[i] = valeurs.cumul_cash_flow()[annee-1]
+        i+=1
+    
     esperance_perte *= 1/nb_simu
     iter_van *= 1/nb_simu
+
+    # Affichage de la répartition du van
+
+    fig, ax = plt.subplots()
+    ax.hist(van_simu, 25)
+    plt.title(f"Répartition des valeurs du VAN à l'année {annee}")
+    st.pyplot(fig)
 
     st.write(f"La probabilité que le VAN soit négatif à l'année {annee} vaut {iter_van}")
 
