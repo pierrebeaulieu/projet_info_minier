@@ -1,3 +1,4 @@
+from loi import loi_func
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
 from ipywidgets import interact, FloatText
 import streamlit as st
@@ -336,7 +337,7 @@ def app():
         
     if loi_cout == "normal":
         moyenne_cout = st.number_input(f"L'investissement est modélisée par une loi normale de moyenne {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
-        bande_cout = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne de la teneur", 1/10)
+        bande_cout = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne du cout", 1/10)
         st.write(f"On considère donc une loi normale de moyenne {moyenne_cout} et d'ecart_type {bande_cout}")
         
         arr = np.random.normal(moyenne_cout, bande_cout*moyenne_cout, size=10000)
@@ -348,7 +349,7 @@ def app():
 
     if loi_cout == "uniform":
         moyenne_cout = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
-        bande_cout = st.number_input(f"Pourcentage de la bande de l'investissement:", 0.1)
+        bande_cout = st.number_input(f"Pourcentage de la bande du cout:", 0.1)
         st.write(f"On considère donc une loi uniforme centrée sur {moyenne_cout} et de bande {bande_cout}")
         
         arr = np.random.uniform(moyenne_cout-moyenne_cout*bande_cout/200, moyenne_cout+moyenne_cout*bande_cout/200, size=10000)
@@ -393,7 +394,7 @@ def app():
 
     if loi_teneur == "uniform":
         moyenne_teneur = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
-        bande_teneur = st.number_input(f"Pourcentage de la bande de l'investissement:", 0.1)
+        bande_teneur = st.number_input(f"Pourcentage de la bande de la teneur:", 0.1)
         st.write(f"On considère donc une loi uniforme centrée sur {moyenne_teneur} et de bande {bande_teneur}")
         
         arr = np.random.uniform(moyenne_teneur-moyenne_teneur*bande_teneur/200, moyenne_teneur+moyenne_teneur*bande_teneur/200, size=10000)
@@ -481,13 +482,14 @@ def app():
 
     i = 1
     
-    evaluable_invest = "np.random." + loi_invest+"()"
+
+    
     while i < nb_simu:
         i+=1
-        valeurs.investissement += np.array(n * [np.random.triangular(moyenne_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
-        valeurs.cout_tonne_remuee += np.array(n* [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
-        valeurs.tonnage_geol += np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
-        valeurs.teneur_minerai_geol += np.array(n * [np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur)])
+        valeurs.investissement += loi_func(loi_invest, moyenne_invest, bande_invest, n)
+        valeurs.cout_tonne_remuee += loi_func(loi_cout, moyenne_cout, bande_cout, n)
+        valeurs.tonnage_geol += loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
+        valeurs.teneur_minerai_geol += loi_func(loi_teneur, moyenne_teneur, bande_teneur, n)
 
     valeurs.investissement *= 1/nb_simu
     valeurs.cout_tonne_remuee *= 1/nb_simu
@@ -528,10 +530,10 @@ def app():
     tri_simu = np.zeros(nb_simu)
 
     while i < nb_simu:
-        valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
-        valeurs.cout_tonne_remuee = np.array(n* [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
-        valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
-        valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur)])
+        valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n)
+        valeurs.cout_tonne_remuee = loi_func(loi_cout, moyenne_cout, bande_cout, n)
+        valeurs.tonnage_geol = loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
+        valeurs.teneur_minerai_geol = loi_func(loi_teneur, moyenne_teneur, bande_teneur, n)
 
         # pour la proba que tri>tri_goal
         if valeurs.tri()[annee-1] > tri_goal:
@@ -561,10 +563,10 @@ def app():
     van_simu = np.zeros(nb_simu)
 
     while i < nb_simu:
-        valeurs.investissement = np.array(n * [np.random.triangular(centre_triang - centre_triang*bande_triang/100, centre_triang, centre_triang + centre_triang*bande_triang/100)])
-        valeurs.cout_tonne_remuee = np.array(n* [np.random.uniform(centre_unif-centre_unif*bande_unif/200, centre_unif+centre_unif*bande_unif/200)])
-        valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, ecart_type*moyenne_tonnage)])
-        valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, ecart_type*moyenne_teneur)])
+        valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n)
+        valeurs.cout_tonne_remuee = loi_func(loi_cout, moyenne_cout, bande_cout, n)
+        valeurs.tonnage_geol = loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
+        valeurs.teneur_minerai_geol = loi_func(loi_teneur, moyenne_teneur, bande_teneur, n)
 
         # pour la proba que van<0
         if valeurs.cumul_cash_flow()[annee-1] < 0:
