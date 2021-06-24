@@ -27,7 +27,7 @@ def app():
     st.text(" ")
     st.text(' ')
 
-    st.markdown("# 0 - Entrée des données # ")
+    st.markdown("# 0 - Entrée des données pour (1) Affichage des données # ")
 
     st.text(" ")   # Pour sauter une ligne, sinon le texte se superpose
     st.text(" ")
@@ -183,3 +183,7 @@ def app():
         st.pyplot(fig) 
 
         downloadbis=st.button('Télécharger le graphique sous forme de .png')
+        if downloadbis:
+            "file_path_graphe= st.text_input('Chemin accès pour telecharger le fichier')"
+            "if len(file_path_graphe)>1:"
+            plt.savefig("graphe.png")

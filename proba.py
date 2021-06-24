@@ -27,7 +27,7 @@ def app():
     st.text(" ")
     st.text(' ')
 
-    st.markdown("# 0 - Entrée des données # ")
+    st.markdown("# 0 - Entrée des données pour (3) Analyse probabiliste # ")
 
     st.text(" ")   # Pour sauter une ligne, sinon le texte se superpose
     st.text(" ")
