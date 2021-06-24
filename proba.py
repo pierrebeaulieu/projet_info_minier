@@ -705,7 +705,7 @@ def app():
         st.header('Statistiques de rentabilité interne')
 
         tri_goal = st.number_input("Objectif de TRI", 0.005, 0.5, 0.05, 0.005)
-        annee = st.number_input("A l'année:", 1, 15, 15, 1)
+        annee = st.number_input("A l'année:", step = 1, min_value = 1, max_value = 15)
 
         i = 0
         iter_tri = 0
