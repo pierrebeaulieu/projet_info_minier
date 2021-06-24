@@ -184,6 +184,7 @@ def app():
 
         downloadbis=st.button('Télécharger le graphique sous forme de .png')
         if downloadbis:
-            "file_path_graphe= st.text_input('Chemin accès pour telecharger le fichier')"
-            "if len(file_path_graphe)>1:"
-            plt.savefig("graphe.png")
+            file_path_graphe= st.text_input('Chemin accès pour telecharger le fichier')
+            if len(file_path_graphe)>1:
+                path = file_path_graphe+"\graphe.png"
+                plt.savefig(path)
