@@ -740,7 +740,7 @@ def app():
 
         i = 0
         iter_van = 0
-        annee = st.number_input("Caculons la probabilité que l'investissement ne soit pas rentable à l'année:", 1, 15, 15, 1)
+        annee = st.number_input("Caculons la probabilité que l'investissement ne soit pas rentable à l'année:",  value = 15, max_value = 30, min_value = 1, step =1)
         esperance_perte = 0
         van_simu = np.zeros(nb_simu)
 
