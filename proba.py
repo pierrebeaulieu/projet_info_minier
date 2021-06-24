@@ -27,6 +27,11 @@ def app():
     st.text(" ")
     st.text(' ')
 
+    st.write(f"Petit guide de l'application:")
+    st.write(f"- Pour télécharger un graphique faire clique droit dessus, et cliquer sur enregistrer l'image sous.")
+    st.write(f"- Il suffit de renseigner une seule fois les données au début dans un des onglets pour naviguer partout ensuite.")
+    st.write(f"- Enregistrement des données possible sous format csv")
+
     st.markdown("# 0 - Entrée des données pour (3) Analyse probabiliste # ")
 
     st.text(" ")   # Pour sauter une ligne, sinon le texte se superpose
@@ -37,7 +42,7 @@ def app():
 
     if type_entree == ".csv":
 
-        st.write(f'Voici le template à télécharger pour renseigner les valeurs en entrée si vous ne le possédez pas déjà')
+        st.write(f'Voici le template à télécharger pour renseigner les valeurs en entrée si vous ne le possédez pas déjà:')
 
         download=st.button('Télécharger le Template')
 
