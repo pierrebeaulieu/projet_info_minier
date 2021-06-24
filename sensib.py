@@ -213,21 +213,34 @@ def app():
         
         st.subheader("Données d'entrée")
         valeurs.n = annees
-        valeurs.investissement = np.array([st.number_input('investissement',270)]*valeurs.n)
-        valeurs.cout_tonne_remuee = np.array([st.number_input('cout_tonne_remuee',4)]*valeurs.n,)
-        valeurs.ratio_sterile = np.array([st.number_input('ratio_sterile',4)]*valeurs.n)
-        valeurs.cout_traitement = np.array([st.number_input('cout_traitement',15)]*valeurs.n)
-        valeurs.charges_fixes = np.array([st.number_input('charges_fixes',18)]*valeurs.n)
-        valeurs.prix_or = np.array([st.number_input('prix_or',1400)]*valeurs.n)
-        valeurs.taux_recuperation_or = np.array([st.number_input('taux_recuperation_or',95)]*valeurs.n)
-        valeurs.prop_or_paye_dore = np.array([st.number_input('prop_or_paye_dore',98)]*valeurs.n)
-        valeurs.nombre_grammes_once = np.array([st.number_input('nombre_grammes_once',31)]*valeurs.n)
-        valeurs.taux_actualisation = np.array([st.number_input('taux_actualisation',5)]*valeurs.n)
-        valeurs.tonnage_geol = np.array([st.number_input('tonnage_geol',11)]*valeurs.n)
-        valeurs.teneur_minerai_geol = np.array([st.number_input('teneur_minerai_geol',3)]*valeurs.n)
-        valeurs.taux_recup = np.array([st.number_input('taux_recup',95)]*valeurs.n)
-        valeurs.dilution_minerai = np.array([st.number_input('dilution_minerai',15)]*valeurs.n)
-        valeurs.rythme_prod_annee = np.array([st.number_input('rythme_prod_annee',0.8)]*valeurs.n)
+        valeurs.investissement = np.array([st.number_input('investissement',value = 270)]*valeurs.n)
+        valeurs.cout_tonne_remuee = np.array([st.number_input('cout_tonne_remuee',value = 4)]*valeurs.n,)
+        valeurs.ratio_sterile = np.array([st.number_input('ratio_sterile',value = 4)]*valeurs.n)
+        valeurs.cout_traitement = np.array([st.number_input('cout_traitement',value = 15)]*valeurs.n)
+        valeurs.charges_fixes = np.array([st.number_input('charges_fixes',value = 18)]*valeurs.n)
+        valeurs.prix_or = np.array([st.number_input('prix_or',value = 1400)]*valeurs.n)
+        valeurs.taux_recuperation_or = np.array([st.number_input('taux_recuperation_or',value = 95)]*valeurs.n)
+        valeurs.prop_or_paye_dore = np.array([st.number_input('prop_or_paye_dore',value = 98)]*valeurs.n)
+        valeurs.nombre_grammes_once = np.array([st.number_input('nombre_grammes_once',value = 31)]*valeurs.n)
+        valeurs.taux_actualisation = np.array([st.number_input('taux_actualisation',value = 5)]*valeurs.n)
+        valeurs.tonnage_geol = np.array([st.number_input('tonnage_geol',value = 11)]*valeurs.n)
+        valeurs.teneur_minerai_geol = np.array([st.number_input('teneur_minerai_geol',value = 3)]*valeurs.n)
+        valeurs.taux_recup = np.array([st.number_input('taux_recup',value = 95)]*valeurs.n)
+        valeurs.dilution_minerai = np.array([st.number_input('dilution_minerai',value = 15)]*valeurs.n)
+        valeurs.rythme_prod_annee = np.array([st.number_input('rythme_prod_annee',value = 0.8)]*valeurs.n)
+
+        download=st.button('Télécharger les variables sous forme de .csv')
+
+        if download:
+            df = pd.read_csv("donnees_entree_proj_minier.csv",sep=';')
+            older = [11,3,95,15,12.02,2.61,0.8,270,4,4,20,15,18,1400,95,98,2.43,31,109.68,5]
+            new = [valeurs.tonnage_geol[0],valeurs.teneur_minerai_geol[0],valeurs.taux_recup[0],valeurs.dilution_minerai[0],valeurs.tonnage_industriel()[0],valeurs.teneur_minerai_industriel()[0],valeurs.rythme_prod_annee[0],valeurs.investissement[0],valeurs.cout_tonne_remuee[0],valeurs.ratio_sterile[0],valeurs.cout_exploitation_tonne_minerai()[0],valeurs.cout_traitement[0],valeurs.charges_fixes[0],valeurs.prix_or[0],valeurs.taux_recuperation_or[0],valeurs.prop_or_paye_dore[0],valeurs.qte_or_paye()[0],valeurs.nombre_grammes_once[0],valeurs.recette_tonne_minerai()[0],valeurs.taux_actualisation[0]]
+            df["valeur"]=df["valeur"].replace(older,new)
+            
+            fichiercsv = df.to_csv(index=False,sep=";")
+            b64 = base64.b64encode(fichiercsv.encode()).decode()  # some strings
+            linko= f'<a href="data:file/csv;base64,{b64}" download="myfilename.csv">Download csv file</a>'
+            st.markdown(linko, unsafe_allow_html=True)
 
         # 1-AFFICHAGE SENSIBILITE
 
