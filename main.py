@@ -7,7 +7,7 @@ import proba
 
 
 PAGES = {
-    "Analyse économique de projets miniers" : cas_base,
+    "Affichage des données" : cas_base,
     "Analyse de sensibilité": sensib,
     "Analyse Probabiliste": proba,
 }
