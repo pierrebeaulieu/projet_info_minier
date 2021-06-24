@@ -758,7 +758,7 @@ def app():
         # Affichage de la répartition du van
 
         fig, ax = plt.subplots()
-        ax.hist(van_simu, 25)
+        ax.hist(van_simu, 70, density = True, stacked = True)
         plt.title(f"Répartition des valeurs du VAN à l'année {annee}")
         st.pyplot(fig)
 
