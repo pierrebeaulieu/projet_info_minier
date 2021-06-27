@@ -1,4 +1,5 @@
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
+from prix_or import prix
 from ipywidgets import interact, FloatText
 import streamlit as st
 import pandas as pd
@@ -632,6 +633,37 @@ def app():
             valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, bande_tonnage*moyenne_tonnage)])
 
         # Fin choix loi tonnage
+        
+        # Debut du choix du prix de l'or:
+
+        st.subheader("Loi de probabilité suivie par le prix de l'or")
+
+        loi_prix_or = st.selectbox("loi du prix de l'or", ['modele de Heath-Jarrow-Morton', 'constante'])
+
+        if loi_prix_or == "modele de Heath-Jarrow-Morton":
+            prix_or_init = st.number_input(f"Le prix de l'or est modélisé par le modele de Heath-Jarrow-Morton partant de la valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
+            Alpha = st.number_input("Paramètre exponentiel du model:", 0.02, 0.06, 0.12, 0.05)
+            Sigma = st.number_input("Ecart type du prix de l'or:", 0.02, 0.05, 0.10, 0.20)
+
+            st.write("voici un exemple d'une suite possible des valeurs du prix de l'or selon ce modèle")
+
+            arr = prix(prix_or_init, n, 12, alpha=Alpha,sigma=Sigma)
+            indices = np.array([i for i in range(n)])
+            fig = plt.fig()
+            plt.plot(indices,arr)
+            plt.style.use('seaborn')
+            st.pyplot(fig)
+
+
+            valeurs.prix_or = np.array(prix(prix_or_init, n, 12, alpha=Alpha,sigma=Sigma))
+
+        if loi_prix_or == "constante":
+            prix_or_init = st.number_input(f"Le prix de l'or est considéré constant de valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
+            valeurs.prix_or = np.array(n * [prix_or_init])
+        
+        #Fin du choix du prix de l'or
+
+
 
         # On trace la sortie voulue du client
 
