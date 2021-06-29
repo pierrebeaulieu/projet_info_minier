@@ -97,6 +97,7 @@ def app():
             
             st.write(f" Le cumul des cash flow avec les données initiales vaut {valeurs.cumul_cash_flow_actu()[-1] :.2f} M$ après l'année {annees-1}")
             #tracé avec les valeurs initiales
+            st.write(f" Pour des soucis de visibilité on affiche à partir de l'année 1. Le Cashflow à l'année 0 vaut {valeurs.investissement[0] :.2f} M$")
             ax = plt.scatter(abscisse, ordonne,
                             label=f"valeur initiale")
 
@@ -193,6 +194,7 @@ def app():
         
         st.write(f" Le cumul des cash flow avec les données initiales vaut {valeurs.cumul_cash_flow_actu()[-1] :.2f} M$ après l'année {n}")
         #tracé avec les valeurs initiales
+        st.write(f" Pour des soucis de visibilité on affiche à partir de l'année 1. Le Cashflow à l'année 0 vaut {valeurs.investissement[0] :.2f} M$")
         ax = plt.scatter(abscisse, ordonne,
                         label=f"valeur initiale")
 
