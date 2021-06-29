@@ -88,14 +88,22 @@ def app():
                 "### Dans un premier temps, on veut déterminer la conséquence de la modification de chaque paramètre d'entrée toute chose égale par ailleurs ### \n  \n \n  ")
             st.markdown("\n \n ")
             def user_input(k):
+                token = False
                 coeff = [1,2,3,4,5,6]
                 entre = [1,2,3,4,5,6]
                 data = dict()
                 for i in range(k):
                     entre[i] = st.selectbox(f'paramètres {i+1} avec incertitude', ["investissement", "cout_tonne_remuee", "ratio_sterile", "cout_traitement", "charges_fixes", "prix_or", "taux_recuperation_or",
                                                                                 "prop_or_paye_dore", "taux_actualisation", "tonnage_geol", "teneur_minerai_geol", "taux_recup", "dilution_minerai", "rythme_prod_annee", "premiere_annee_prod"], index=1)
-                    coeff[i] = st.slider(
-                    f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
+                    if entre[i]=="taux_recup":
+                        coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0., int(100*100/valeurs.taux_recup[0])/100, 1.)
+                    elif entre[i]=="taux_recuperation_or":
+                        coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0., int(100*100/valeurs.taux_recuperation_or[0])/100, 1.)
+                    elif entre[i]=="investissement":
+                        coeff[i] = st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
+                        token=True
+                    else:
+                        coeff[i] = st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
                     data[f"coefficient{i+1}"] = coeff[i]
                     data[f"entrees{i+1}"] = entre[i]
                 
@@ -105,10 +113,10 @@ def app():
                 data['options']=  options
                 data['annees'] = annees 
                 parametres = pd.DataFrame(data, index=["1ère valeure modifiée"])
-                return parametres
+                return parametres,token
 
 
-            df = user_input(u)
+            df,token = user_input(u)
 
             #sortie que le client souhaite observer
             sortie_voulue = df.loc['1ère valeure modifiée', 'options']
@@ -137,6 +145,10 @@ def app():
             ax = plt.scatter(abscisse, sortie,
                             label=f"valeur initiale")
 
+            if token: 
+                st.write(f"Pour des raisons d'échelle, nous traçons nos valeurs à partir de l'année 1. Donc en modifiant l'investissement nous ne voyons pas d'impact sur le cashflow car celui ci n'est modifié qu'en annee 0. Sa valeur à l'année 0 est donc {valeur.cash_flow_actu()[0]} M$")
+
+
             for i in range(u): 
                 # on extrait les données du tableau de base et modifie en fonction du choix du client
                 valeur = deepcopy(valeurs)
@@ -150,8 +162,7 @@ def app():
                 params_modif *= coeff
                 change = f"valeur.{entree_modif}"
                 changement = eval(change)
-                st.markdown(
-                f" Le cumul des cash flow avec {entree_modif} modifiées vaut {valeur.cumul_cash_flow_actu()[-1] :.2f} M$ après l'année {n-1} ")
+                
                 sortie_modif = eval("valeur."+f"{sortie_voulue}"+"()")[1:]
                 
                 ax = plt.scatter(abscisse, sortie_modif,
@@ -274,19 +285,29 @@ def app():
 
         #détermine le nombre de paramètre à modifier
         u = st.number_input("nombre d'entrées à modifier", 1,5,step=1)
-
+        
         st.markdown(
             "### Dans un premier temps, on veut déterminer la conséquence de la modification de chaque paramètre d'entrée toute chose égale par ailleurs ### \n  \n \n  ")
         st.markdown("\n \n ")
         def user_input(k):
+            token = False
             coeff = [1,2,3,4,5,6]
             entre = [1,2,3,4,5,6]
             data = dict()
             for i in range(k):
                 entre[i] = st.selectbox(f'paramètres {i+1} avec incertitude', ["investissement", "cout_tonne_remuee", "ratio_sterile", "cout_traitement", "charges_fixes", "prix_or", "taux_recuperation_or",
                                                                             "prop_or_paye_dore", "taux_actualisation", "tonnage_geol", "teneur_minerai_geol", "taux_recup", "dilution_minerai", "rythme_prod_annee", "premiere_annee_prod"], index=1)
-                coeff[i] = st.slider(
-                f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
+                if entre[i]=="taux_recup":
+                    coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0, int(100*100/valeurs.taux_recup[0])/100, 1.)
+                elif entre[i]=="taux_recuperation_or":
+                    coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0, int(100*100/valeurs.taux_recuperation_or[0])/100, 1.)
+                elif entre[i]=="investissement":
+                    coeff[i] = st.slider(
+                    f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
+                    token=True
+                else:
+                    coeff[i] = st.slider(
+                    f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
                 data[f"coefficient{i+1}"] = coeff[i]
                 data[f"entrees{i+1}"] = entre[i]
             
@@ -296,10 +317,10 @@ def app():
             data['options']=  options
             data['annees'] = annees 
             parametres = pd.DataFrame(data, index=["1ère valeure modifiée"])
-            return parametres
+            return parametres,token
 
 
-        df = user_input(u)
+        df,token = user_input(u)
 
         #sortie que le client souhaite observer
         sortie_voulue = df.loc['1ère valeure modifiée', 'options']
@@ -317,13 +338,13 @@ def app():
 
         st.write(df) # à enlever à la fin mais permet de visualiser le tableau
 
+        
 
         abscisse = np.arange(1,n) #on fait partir à 1 car pour l'année 0, seulement investissement initiale
         fig, ax = plt.subplots()
         plt.style.use('seaborn')  # pour avoir un autre style de graphique plus frais
         evaluable = "valeurs."+f"{sortie_voulue}"+"()"
         sortie = eval(evaluable)[1:]
-        st.write(f" Le cumul des cash flow avec les données initiales vaut {valeurs.cumul_cash_flow_actu()[-1] :.2f} M$ après l'année {n-1}")
         #tracé avec les valeurs initiales
         ax = plt.scatter(abscisse, sortie,
                         label=f"valeur initiale")
@@ -341,12 +362,13 @@ def app():
             params_modif *= coeff
             change = f"valeur.{entree_modif}"
             changement = eval(change)
-            st.markdown(
-            f" Le cumul des cash flow avec {entree_modif} modifiées vaut {valeur.cumul_cash_flow_actu()[-1] :.2f} M$ après l'année {n-1} ")
             sortie_modif = eval("valeur."+f"{sortie_voulue}"+"()")[1:]
             
             ax = plt.scatter(abscisse, sortie_modif,
                         label=f"{entree_modif} modifiée facteur {coeff}")
+
+            if token: 
+                st.write(f"Pour des raisons d'échelle, nous traçons nos valeurs à partir de l'année 1. Donc en modifiant l'investissement nous ne voyons pas d'impact sur le cashflow car celui ci n'est modifié qu'en annee 0. Sa valeur à l'année 0 est donc {valeur.cash_flow_actu()[0]} M$")
 
 
 
