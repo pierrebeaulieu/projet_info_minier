@@ -82,13 +82,14 @@ def app():
             
             # Ce que l'on doit tracer en fonction des années
 
-            sortie = st.selectbox("Axe des ordonnées", ['cash_flow_actu', 'tri', "cumul_cash_flow_actu"], )
+            sortie = st.selectbox("Axe des ordonnées", ['cash_flow_actu', 'tri', "cumul_cash_flow_actu","cash_flow","cumul_cash_flow",], )
 
 
 
             # tableau d'entrée avec le bon nombre d'années
             
             abscisse = np.arange(1,annees)
+            
             evaluable = "valeurs."+f"{sortie}"+"()"
             ordonne = eval(evaluable)[1:]
             fig, ax = plt.subplots()
@@ -124,7 +125,7 @@ def app():
         
         st.subheader("Données d'entrée")
         valeurs.n = annees
-        valeurs.investissement = np.array([st.number_input('investissement',value = 270)]*valeurs.n)
+        valeurs.investissement = np.array([st.number_input('investissement',value = 270)]+(valeurs.n-1)*[0])
         valeurs.cout_tonne_remuee = np.array([st.number_input('cout_tonne_remuee',value = 4)]*valeurs.n,)
         valeurs.ratio_sterile = np.array([st.number_input('ratio_sterile',value = 4)]*valeurs.n)
         valeurs.cout_traitement = np.array([st.number_input('cout_traitement',value = 15)]*valeurs.n)
@@ -139,6 +140,21 @@ def app():
         valeurs.taux_recup = np.array([st.number_input('taux_recup',value = 95)]*valeurs.n)
         valeurs.dilution_minerai = np.array([st.number_input('dilution_minerai',value = 15)]*valeurs.n)
         valeurs.rythme_prod_annee = np.array([st.number_input('rythme_prod_annee',value = 0.8)]*valeurs.n)
+        for j in range(0,int(valeurs.premiere_annee_prod[0])):
+            valeurs.rythme_prod_annee[j]=0
+        retour = np.zeros(valeurs.n)
+        tonnage_indus = valeurs.tonnage_geol * valeurs.taux_recup/100 * (valeurs.dilution_minerai/100 + np.ones(valeurs.n))
+        retour[0] += tonnage_indus[0]
+    
+        k=1
+        while k<n and (retour[k-1]-valeurs.rythme_prod_annee[k-1])>=0:
+            retour [k]=retour[k-1]-valeurs.rythme_prod_annee[k-1]
+            k+=1
+        if retour[k-1]-valeurs.rythme_prod_annee[k-1]<0:
+            valeurs.rythme_prod_annee[k-1]=retour[k-1]
+            for i in range(k,valeurs.n):
+                retour[i]=0
+                valeurs.rythme_prod_annee[i]=0
 
         download=st.button('Télécharger les variables sous forme de .csv')
 
@@ -163,7 +179,7 @@ def app():
         
         # Ce que l'on doit tracer en fonction des années
 
-        sortie = st.selectbox("Axe des ordonnées", ['cash_flow_actu', 'tri', "cumul_cash_flow_actu"], )
+        sortie = st.selectbox("Axe des ordonnées", ['cash_flow_actu', 'tri', "cumul_cash_flow_actu","cash_flow",], )
 
 
 
@@ -175,7 +191,7 @@ def app():
         fig, ax = plt.subplots()
         plt.style.use('seaborn')  # pour avoir un autre style de graphique plus frais
         
-        st.write(f" Le cumul des cash flow avec les données initiales vaut {valeurs.cumul_cash_flow_actu()[-1] :.2f} M$ après l'année {n-1}")
+        st.write(f" Le cumul des cash flow avec les données initiales vaut {valeurs.cumul_cash_flow_actu()[-1] :.2f} M$ après l'année {n}")
         #tracé avec les valeurs initiales
         ax = plt.scatter(abscisse, ordonne,
                         label=f"valeur initiale")

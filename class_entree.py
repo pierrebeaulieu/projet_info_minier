@@ -5,8 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import base64
-import io
+
+
 from copy import deepcopy
 
 # Pour récupérer les données
@@ -85,7 +85,7 @@ def extraction_csv(nom_fichier, n):
 
     # On prend des valeurs constantes dans un premier temps sur n années.
     for i in range(n-1):
-        investissement.append(investissement[0])
+        investissement.append(0)
     investissement = np.array(investissement)
     cout_tonne_remuee = np.array(n*cout_tonne_remuee)
     ratio_sterile = np.array(n*ratio_sterile)
@@ -100,8 +100,24 @@ def extraction_csv(nom_fichier, n):
     teneur_minerai_geol = np.array(n*teneur_minerai_geol)
     taux_recup = np.array(n*taux_recup)
     dilution_minerai = np.array(n*dilution_minerai)
-    rythme_prod_annee = np.array(n*rythme_prod_annee)
     premiere_annee_prod = np.array(n*premiere_annee_prod)
+    rythme_prod_annee = np.array(n*rythme_prod_annee)
+    for j in range(0,int(premiere_annee_prod[0])):
+        rythme_prod_annee[j]=0
+    retour = np.zeros(n)
+    tonnage_indus = tonnage_geol * taux_recup/100 * (dilution_minerai/100 + np.ones(n))
+    retour[0] += tonnage_indus[0]
+    
+    k=1
+    while k<n and (retour[k-1]-rythme_prod_annee[k-1])>=0:
+        retour [k]=retour[k-1]-rythme_prod_annee[k-1]
+        k+=1
+    if retour[k-1]-rythme_prod_annee[k-1]<0:
+        rythme_prod_annee[k-1]=retour[k-1]
+        for i in range(k,n):
+            retour[i]=0
+            rythme_prod_annee[i]=0
+
 
     # Creation du dictionnaire
 
@@ -154,6 +170,7 @@ class entree:
     def cout_exploitation_tonne_minerai(self):
         return self.cout_tonne_remuee * (self.ratio_sterile + np.ones(self.n))
 
+
     def teneur_minerai_industriel(self):
         return self.teneur_minerai_geol/(self.dilution_minerai/100 + np.ones(self.n))
 
@@ -173,7 +190,25 @@ class entree:
         return self.rythme_prod_annee * self.cout_traitement
 
     def charges_fixes_(self):
-        return self.charges_fixes
+        k=1
+        token = True
+        for j in range(1,self.n):
+            if self.rythme_prod_annee[j]==0 and token:
+                k=j
+                token = False
+        if k==1:
+            new = np.copy(self.charges_fixes)
+            new[0]=0
+            for j in range(1,self.n):
+                new[j]=self.charges_fixes[1]
+            return new
+        else:
+            new = np.copy(self.charges_fixes)
+            new[0]=0
+            new[k-1]=self.charges_fixes[0]*self.rythme_prod_annee[k-1]/self.rythme_prod_annee[k-2]
+            for j in range(k,self.n):
+                new[j]=0
+            return new
 
     def dep_operatoiresTotale(self):
         return self.charges_fixes_() + self.dep_operatoiresTraitement() + self.dep_operatoiresMCO()
@@ -182,8 +217,7 @@ class entree:
         return self.rythme_prod_annee * self.recette_tonne_minerai()
 
     def cash_flow(self):
-        cash = self.recette() - self.dep_operatoiresTotale() - self.cout_traitement
-        cash[0] -= self.investissement[0]
+        cash = self.recette() - self.dep_operatoiresTotale()-self.investissement
         return cash
 
 # investissement pas pris en compte, revoir formule
@@ -191,8 +225,8 @@ class entree:
     def cumul_cash_flow(self):
         cumul = self.cash_flow()
         sortie = np.zeros(self.n)
-        N = len(cumul)
-        for i in range(N):
+        
+        for i in range(self.n):
             sortie[i] = np.sum(cumul[:i])
         return sortie
 
@@ -206,10 +240,9 @@ class entree:
 
     def cash_flow_actu(self):
         CF = self.cash_flow()
-        N = len(CF)
         facteur = self.taux_actualisation_()
         CFA = np.copy(CF)
-        return facteur * CF
+        return facteur * CFA
 
     def cumul_cash_flow_actu(self):
         cumul = self.cash_flow_actu()

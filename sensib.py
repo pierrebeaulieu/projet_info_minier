@@ -218,7 +218,7 @@ def app():
         
         st.subheader("Données d'entrée")
         valeurs.n = annees
-        valeurs.investissement = np.array([st.number_input('investissement',value = 270)]*valeurs.n)
+        valeurs.investissement = np.array([st.number_input('investissement',value = 270)]+(valeurs.n-1)*[0])
         valeurs.cout_tonne_remuee = np.array([st.number_input('cout_tonne_remuee',value = 4)]*valeurs.n,)
         valeurs.ratio_sterile = np.array([st.number_input('ratio_sterile',value = 4)]*valeurs.n)
         valeurs.cout_traitement = np.array([st.number_input('cout_traitement',value = 15)]*valeurs.n)
@@ -233,6 +233,21 @@ def app():
         valeurs.taux_recup = np.array([st.number_input('taux_recup',value = 95)]*valeurs.n)
         valeurs.dilution_minerai = np.array([st.number_input('dilution_minerai',value = 15)]*valeurs.n)
         valeurs.rythme_prod_annee = np.array([st.number_input('rythme_prod_annee',value = 0.8)]*valeurs.n)
+        for j in range(0,int(valeurs.premiere_annee_prod[0])):
+            valeurs.rythme_prod_annee[j]=0
+        retour = np.zeros(valeurs.n)
+        tonnage_indus = valeurs.tonnage_geol * valeurs.taux_recup/100 * (valeurs.dilution_minerai/100 + np.ones(valeurs.n))
+        retour[0] += tonnage_indus[0]
+    
+        k=1
+        while k<n and (retour[k-1]-valeurs.rythme_prod_annee[k-1])>=0:
+            retour [k]=retour[k-1]-valeurs.rythme_prod_annee[k-1]
+            k+=1
+        if retour[k-1]-valeurs.rythme_prod_annee[k-1]<0:
+            valeurs.rythme_prod_annee[k-1]=retour[k-1]
+            for i in range(k,valeurs.n):
+                retour[i]=0
+                valeurs.rythme_prod_annee[i]=0
 
         download=st.button('Télécharger les variables sous forme de .csv')
 
