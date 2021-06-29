@@ -223,7 +223,7 @@ def app():
 
                     valeurs.teneur_minerai_geol = np.array(n * [np.random.triangular(moyenne_teneur - moyenne_teneur*bande_teneur/100, moyenne_teneur, moyenne_teneur + moyenne_teneur*bande_teneur/100)])
                     
-                    st.write("Les nouvelles valeurs pour la teneur du minerai géologique sont (pour une simulation):", valeurs.investissement)
+    
 
                 if loi_teneur == "normal":
                     moyenne_teneur = st.number_input(f"La teneur est modélisée par une loi normale de moyenne {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
@@ -325,7 +325,7 @@ def app():
 
             st.subheader("Loi de probabilité suivie par le prix de l'or")
 
-            loi_prix_or = st.selectbox("loi du prix de l'or", ['modele de Heath-Jarrow-Morton', 'constante'])
+            loi_prix_or = st.selectbox("loi du prix de l'or", ['constante','modele de Heath-Jarrow-Morton' ])
 
             if loi_prix_or == "modele de Heath-Jarrow-Morton":
                 prix_or_init = st.number_input(f"Le prix de l'or est modélisé par le modele de Heath-Jarrow-Morton partant de la valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
@@ -729,7 +729,7 @@ def app():
 
         st.subheader("Loi de probabilité suivie par le prix de l'or")
 
-        loi_prix_or = st.selectbox("loi du prix de l'or", ['modele de Heath-Jarrow-Morton', 'constante'])
+        loi_prix_or = st.selectbox("loi du prix de l'or", ['constante','modele de Heath-Jarrow-Morton' ])
 
         if loi_prix_or == "modele de Heath-Jarrow-Morton":
             prix_or_init = st.number_input(f"Le prix de l'or est modélisé par le modele de Heath-Jarrow-Morton partant de la valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
