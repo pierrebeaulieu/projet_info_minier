@@ -91,7 +91,7 @@ def app():
                 if loi_invest == "triangular":
                     moyenne_invest = st.number_input(f"L'investissement est modélisé par une loi triangulaire centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
                     bande_invest = st.number_input("Pourcentage de la bande de l'investissement:", 1, 50, 10, 1)
-                    st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_invest}M$ et de bande {bande_invest}%')
+                    st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_invest :.2f}M$ et de bande {bande_invest}%')
 
                     arr = np.random.triangular(moyenne_invest - moyenne_invest*bande_invest/100, moyenne_invest, moyenne_invest + moyenne_invest*bande_invest/100, size=10000)
                     fig, ax = plt.subplots()
@@ -270,7 +270,7 @@ def app():
                 loi_tonnage = st.selectbox("loi du tonnage", ['triangular', 'normal', 'uniform'])
 
                 if loi_tonnage == "triangular":
-                    moyenne_tonnage = st.number_input(f"Le tonnage est modélisé par une loi triangulaire centrée sur la valeur {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
+                    moyenne_tonnage = st.number_input(f"Le tonnage est modélisé par une loi triangulaire centrée sur la valeur {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.tonnage_geol[0])
                     bande_tonnage = st.number_input("Pourcentage de la bande du tonnage:", 1, 50, 10, 1)
                     st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_tonnage}M$ et de bande {bande_tonnage}%')
 
@@ -449,7 +449,7 @@ def app():
 
             iter_tri *= 1/nb_simu
 
-            st.write(f"La probabilité que le TRI soit supérieur à {tri_goal} à l'année {annee} vaut {iter_tri}")
+            st.write(f"La probabilité que le TRI soit supérieur à {tri_goal} à l'année {annee} vaut {iter_tri :.2f}")
 
             # Calculons alors le risque de rentabilité du projet
 
@@ -484,9 +484,9 @@ def app():
             plt.title(f"Répartition des valeurs du VAN à l'année {annee}")
             st.pyplot(fig)
 
-            st.write(f"La probabilité que le VAN soit négatif à l'année {annee} vaut {iter_van}")
+            st.write(f"La probabilité que le VAN soit négatif à l'année {annee} vaut {iter_van :.2f}")
 
-            st.write(f"De plus, l'espérance de perte à l'année {annee} vaut {esperance_perte }M$")
+            st.write(f"De plus, l'espérance de perte à l'année {annee} vaut {esperance_perte :.2f }M$")
 
 
     else :
@@ -542,8 +542,15 @@ def app():
         valeurs_non_modif = deepcopy(valeurs)
 
         st.header("Modélisation des lois de probabilité des paramètres incertains")
+        variables = st.multiselect("variables soumises à des incertitudes",["investissement", "coût", "teneur", "tonnage"])
+
+            #Début choix loi investissement
+
+             
+
 
         # On modélise la loi de probabilité de l'investissement en tenant compte du choix du client
+        
 
         st.subheader("Loi de probabilité suivie par l'investissement")
 
@@ -578,7 +585,7 @@ def app():
             valeurs.investissement[1:] = 0
 
         if loi_invest == "uniform":
-            moyenne_invest = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+            moyenne_invest = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
             bande_invest = st.number_input(f"Pourcentage de la bande de l'investissement:", 0.1)
             st.write(f"On considère donc une loi uniforme centrée sur {moyenne_invest} et de bande {bande_invest}")
             
@@ -653,7 +660,7 @@ def app():
 
             valeurs.teneur_minerai_geol = np.array(n * [np.random.triangular(moyenne_teneur - moyenne_teneur*bande_teneur/100, moyenne_teneur, moyenne_teneur + moyenne_teneur*bande_teneur/100)])
             
-            st.write("Les nouvelles valeurs pour la teneur du minerai géologique sont (pour une simulation):", valeurs.investissement)
+
 
         if loi_teneur == "normal":
             moyenne_teneur = st.number_input(f"La teneur est modélisée par une loi normale de moyenne {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
@@ -688,7 +695,7 @@ def app():
         loi_tonnage = st.selectbox("loi du tonnage", ['triangular', 'normal', 'uniform'])
 
         if loi_tonnage == "triangular":
-            moyenne_tonnage = st.number_input(f"Le tonnage est modélisé par une loi triangulaire centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
+            moyenne_tonnage = st.number_input(f"Le tonnage est modélisé par une loi triangulaire centrée sur la valeur {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.tonnage_geol[0])
             bande_tonnage = st.number_input("Pourcentage de la bande du tonnage:", 1, 50, 10, 1)
             st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_tonnage}M$ et de bande {bande_tonnage}%')
 
@@ -701,7 +708,7 @@ def app():
             
 
         if loi_tonnage == "normal":
-            moyenne_tonnage = st.number_input(f"Le tonnage est modélisée par une loi normale de moyenne {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+            moyenne_tonnage = st.number_input(f"Le tonnage est modélisée par une loi normale de moyenne {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
             bande_tonnage = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne du tonnage", 1/10)
             st.write(f"On considère donc une loi normale de moyenne {moyenne_tonnage} et d'ecart_type {bande_tonnage}")
             
@@ -713,7 +720,7 @@ def app():
             valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, bande_tonnage*moyenne_tonnage)])
 
         if loi_tonnage == "uniform":
-            moyenne_tonnage = st.number_input(f"Le tonnage est modélisée par une loi uniforme centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+            moyenne_tonnage = st.number_input(f"Le tonnage est modélisée par une loi uniforme centrée sur la valeur {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
             bande_tonnage = st.number_input(f"Pourcentage de la bande du tonnage:", 0.1)
             st.write(f"On considère donc une loi uniforme centrée sur {moyenne_tonnage} et de bande {bande_tonnage}")
             
@@ -855,7 +862,7 @@ def app():
 
         iter_tri *= 1/nb_simu
 
-        st.write(f"La probabilité que le TRI soit supérieur à {tri_goal} à l'année {annee} vaut {iter_tri}")
+        st.write(f"La probabilité que le TRI soit supérieur à {tri_goal} à l'année {annee} vaut {iter_tri :.2f}")
 
         # Calculons alors le risque de rentabilité du projet
 
@@ -891,6 +898,6 @@ def app():
         plt.title(f"Répartition des valeurs du VAN à l'année {annee}")
         st.pyplot(fig)
 
-        st.write(f"La probabilité que le VAN soit négatif à l'année {annee} vaut {iter_van}")
+        st.write(f"La probabilité que le VAN soit négatif à l'année {annee} vaut {iter_van :.2f}")
 
-        st.write(f"De plus, l'espérance de perte à l'année {annee} vaut {esperance_perte }M$")
+        st.write(f"De plus, l'espérance de perte à l'année {annee} vaut {esperance_perte:.2f}M$")
