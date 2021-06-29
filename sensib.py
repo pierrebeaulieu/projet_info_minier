@@ -96,9 +96,9 @@ def app():
                     entre[i] = st.selectbox(f'paramètres {i+1} avec incertitude', ["investissement", "cout_tonne_remuee", "ratio_sterile", "cout_traitement", "charges_fixes", "prix_or", "taux_recuperation_or",
                                                                                 "prop_or_paye_dore", "taux_actualisation", "tonnage_geol", "teneur_minerai_geol", "taux_recup", "dilution_minerai", "rythme_prod_annee", "premiere_annee_prod"], index=1)
                     if entre[i]=="taux_recup":
-                        coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0., int(100*100/valeurs.taux_recup[0])/100, 1.)
+                        coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0., float(int(100*100/valeurs.taux_recup[0])/100), 1.)
                     elif entre[i]=="taux_recuperation_or":
-                        coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0., int(100*100/valeurs.taux_recuperation_or[0])/100, 1.)
+                        coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0., float(int(100*100/valeurs.taux_recuperation_or[0])/100), 1.)
                     elif entre[i]=="investissement":
                         coeff[i] = st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
                         token=True
@@ -298,9 +298,9 @@ def app():
                 entre[i] = st.selectbox(f'paramètres {i+1} avec incertitude', ["investissement", "cout_tonne_remuee", "ratio_sterile", "cout_traitement", "charges_fixes", "prix_or", "taux_recuperation_or",
                                                                             "prop_or_paye_dore", "taux_actualisation", "tonnage_geol", "teneur_minerai_geol", "taux_recup", "dilution_minerai", "rythme_prod_annee", "premiere_annee_prod"], index=1)
                 if entre[i]=="taux_recup":
-                    coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0, int(100*100/valeurs.taux_recup[0])/100, 1.)
+                    coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0., float(int(100*100/valeurs.taux_recup[0])/100), 1.)
                 elif entre[i]=="taux_recuperation_or":
-                    coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0, int(100*100/valeurs.taux_recuperation_or[0])/100, 1.)
+                    coeff[i]=st.slider(f"coefficient modificateur de l'entrée {i+1} modifiée", 0., float(int(100*100/valeurs.taux_recuperation_or[0])/100), 1.)
                 elif entre[i]=="investissement":
                     coeff[i] = st.slider(
                     f"coefficient modificateur de l'entrée {i+1} modifiée", 0.5, 1.5, 1.)
