@@ -323,31 +323,31 @@ def app():
 
             # Debut du choix du prix de l'or:
 
-        st.subheader("Loi de probabilité suivie par le prix de l'or")
+            st.subheader("Loi de probabilité suivie par le prix de l'or")
 
-        loi_prix_or = st.selectbox("loi du prix de l'or", ['modele de Heath-Jarrow-Morton', 'constante'])
+            loi_prix_or = st.selectbox("loi du prix de l'or", ['modele de Heath-Jarrow-Morton', 'constante'])
 
-        if loi_prix_or == "modele de Heath-Jarrow-Morton":
-            prix_or_init = st.number_input(f"Le prix de l'or est modélisé par le modele de Heath-Jarrow-Morton partant de la valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
-            Alpha = st.number_input("Paramètre exponentiel du model:", 0.1, 0.3, 0.2, 0.01)
-            Sigma = st.number_input("Ecart type du prix de l'or:", 0.05, 0.15, 0.1, 0.01)
+            if loi_prix_or == "modele de Heath-Jarrow-Morton":
+                prix_or_init = st.number_input(f"Le prix de l'or est modélisé par le modele de Heath-Jarrow-Morton partant de la valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
+                Alpha = st.number_input("Paramètre exponentiel du model:", 0.1, 0.3, 0.2, 0.01)
+                Sigma = st.number_input("Ecart type du prix de l'or:", 0.05, 0.15, 0.1, 0.01)
 
-            st.write("voici un exemple d'une suite possible des valeurs du prix de l'or selon ce modèle")
+                st.write("voici un exemple d'une suite possible des valeurs du prix de l'or selon ce modèle")
 
-            arr = np.array(prix(prix_or_init, n, 12, alpha=Alpha,sigma=Sigma))
-            fig, ax = plt.subplots()
-            ax.plot(arr, 'o')
-            plt.style.use('seaborn')
-            st.pyplot(fig)
+                arr = np.array(prix(prix_or_init, n, 12, alpha=Alpha,sigma=Sigma))
+                fig, ax = plt.subplots()
+                ax.plot(arr, 'o')
+                plt.style.use('seaborn')
+                st.pyplot(fig)
 
 
-            valeurs.prix_or = np.array(prix(prix_or_init, n, 12, alpha=Alpha,sigma=Sigma))
+                valeurs.prix_or = np.array(prix(prix_or_init, n, 12, alpha=Alpha,sigma=Sigma))
 
-        if loi_prix_or == "constante":
-            prix_or_init = st.number_input(f"Le prix de l'or est considéré constant de valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
-            valeurs.prix_or = np.array(n * [prix_or_init])
-        
-        #Fin du choix du prix de l'or
+            if loi_prix_or == "constante":
+                prix_or_init = st.number_input(f"Le prix de l'or est considéré constant de valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
+                valeurs.prix_or = np.array(n * [prix_or_init])
+            
+            #Fin du choix du prix de l'or
 
 
             # On trace la sortie voulue du client
@@ -834,7 +834,7 @@ def app():
         tri_simu = np.zeros(nb_simu)
 
         while i < nb_simu:
-            valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n)
+            valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n, bool = False)
             valeurs.investissement[1:] = 0
             valeurs.cout_tonne_remuee = loi_func(loi_cout, moyenne_cout, bande_cout, n)
             valeurs.tonnage_geol = loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
