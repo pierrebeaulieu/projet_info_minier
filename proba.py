@@ -740,7 +740,7 @@ def app():
 
         if loi_prix_or == "modele de Heath-Jarrow-Morton":
             prix_or_init = st.number_input(f"Le prix de l'or est modélisé par le modele de Heath-Jarrow-Morton partant de la valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
-            Alpha = st.number_input("Paramètre exponentiel du model:", 0.02, 0.12, 0.06, 0.01)
+            Alpha = st.number_input("Paramètre exponentiel du model:", 0.1, 0.35, 0.25, 0.01)
             Sigma = st.number_input("Ecart type du prix de l'or:", 0.05, 0.15, 0.1, 0.01)
 
             st.write("voici un exemple d'une suite possible des valeurs du prix de l'or selon ce modèle")
