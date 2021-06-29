@@ -73,18 +73,14 @@ def prix(prix_init,nb_annees, n,delta=1, sigma=0.15, alpha=0.12, To=0):
     prix de l'or.
     En sortie, le prix de l'or à chaque année selon le modèle.
     """
-    sigma = 0.01*sigma
     prix = prix_init
     liste_prix = np.zeros(nb_annees)
-    W = np.exp(brownian(0, nb_annees*n, 1/n, delta))
-    W.resize(nb_annees,n)
     for i in range(nb_annees):
         liste_prix[i] = prix
-
+        W = 0.01*np.exp(brownian(0, n, 1/n, delta))
         #calcul de l'intégrale par méthode des rectangles:
         integrale = 0
         for j in range(n):
-            integrale += sigma*np.exp(-alpha*(To-j*(1/n)))*W[i][j]
+            integrale += sigma*np.exp(-alpha*(To-j*(1/n)))*W[j]
         prix = prix*np.exp(integrale - ((sigma**2)/(4*alpha))*np.exp(-2*alpha*To)*(np.exp(2*alpha)-1))
     return liste_prix
-
