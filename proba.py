@@ -1,11 +1,10 @@
 from google.protobuf.internal.enum_type_wrapper import EnumTypeWrapper
-from prix_or import prix
 from ipywidgets import interact, FloatText
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-
+from prix_or import prix
 import base64
 
 from copy import deepcopy
@@ -28,12 +27,7 @@ def app():
     st.text(" ")
     st.text(' ')
 
-    st.write(f"Petit guide de l'application:")
-    st.write(f"- Pour télécharger un graphique faire clique droit dessus, et cliquer sur enregistrer l'image sous.")
-    st.write(f"- Il suffit de renseigner une seule fois les données au début dans un des onglets pour naviguer partout ensuite.")
-    st.write(f"- Enregistrement des données possible sous format csv")
-
-    st.markdown("# 0 - Entrée des données pour (3) Analyse probabiliste # ")
+    st.markdown("# 0 - Entrée des données # ")
 
     st.text(" ")   # Pour sauter une ligne, sinon le texte se superpose
     st.text(" ")
@@ -43,7 +37,7 @@ def app():
 
     if type_entree == ".csv":
 
-        st.write(f'Voici le template à télécharger pour renseigner les valeurs en entrée si vous ne le possédez pas déjà:')
+        st.write(f'Voici le template à télécharger pour renseigner les valeurs en entrée si vous ne le possédez pas déjà')
 
         download=st.button('Télécharger le Template')
 
@@ -84,184 +78,277 @@ def app():
 
             # On modélise la loi de probabilité de l'investissement en tenant compte du choix du client
 
-            st.subheader("Loi de probabilité suivie par l'investissement")
+            variables = st.multiselect("variables soumises à des incertitudes",["investissement", "coût", "teneur", "tonnage"])
 
             #Début choix loi investissement
+
+            if "investissement" in variables:
             
-            loi_invest = st.selectbox("loi de l'investissement", ['triangular', 'normal', 'uniform'])
+                st.subheader("Loi de probabilité suivie par l'investissement")
 
-            if loi_invest == "triangular":
-                moyenne_invest = st.number_input(f"L'investissement est modélisé par une loi triangulaire centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
-                bande_invest = st.number_input("Pourcentage de la bande de l'investissement:", 1, 50, 10, 1)
-                st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_invest}M$ et de bande {bande_invest}%')
+                loi_invest = st.selectbox("loi de l'investissement", ['triangular', 'normal', 'uniform'])
 
-                arr = np.random.triangular(moyenne_invest - moyenne_invest*bande_invest/100, moyenne_invest, moyenne_invest + moyenne_invest*bande_invest/100, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
+                if loi_invest == "triangular":
+                    moyenne_invest = st.number_input(f"L'investissement est modélisé par une loi triangulaire centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
+                    bande_invest = st.number_input("Pourcentage de la bande de l'investissement:", 1, 50, 10, 1)
+                    st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_invest}M$ et de bande {bande_invest}%')
 
-                valeurs.investissement = np.array(n * [np.random.triangular(moyenne_invest - moyenne_invest*bande_invest/100, moyenne_invest, moyenne_invest + moyenne_invest*bande_invest/100)])
+                    arr = np.random.triangular(moyenne_invest - moyenne_invest*bande_invest/100, moyenne_invest, moyenne_invest + moyenne_invest*bande_invest/100, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("investissement")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
+
+                    valeurs.investissement = np.array(n * [np.random.triangular(moyenne_invest - moyenne_invest*bande_invest/100, moyenne_invest, moyenne_invest + moyenne_invest*bande_invest/100)])
+                    valeurs.investissement[1:]= 0
+
+                if loi_invest == "normal":
+                    moyenne_invest = st.number_input(f"L'investissement est modélisée par une loi normale de moyenne {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+                    bande_invest = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne de la teneur", 1/10)
+                    st.write(f"On considère donc une loi normale de moyenne {moyenne_invest} et d'ecart_type {bande_invest}")
+                    
+                    arr = np.random.normal(moyenne_invest, bande_invest*moyenne_invest, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("investissement")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
+
+                    valeurs.investissement = np.array(n * [np.random.normal(moyenne_invest, bande_invest*moyenne_invest)])
+                    valeurs.investissement[1:]= 0
+
+                if loi_invest == "uniform":
+                    moyenne_invest = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+                    bande_invest = st.number_input(f"Pourcentage de la bande de l'investissement:", 0.1)
+                    st.write(f"On considère donc une loi uniforme centrée sur {moyenne_invest} et de bande {bande_invest}")
+                    
+                    arr = np.random.uniform(moyenne_invest-moyenne_invest*bande_invest/200, moyenne_invest+moyenne_invest*bande_invest/200, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("investissement")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
+
+                    valeurs.investissement = np.array(n * [np.random.normal(moyenne_invest, bande_invest*moyenne_invest)])
+                    valeurs.investissement[1:]= 0
+
+                # Fin choix loi investissement
             
-
-            if loi_invest == "normal":
-                moyenne_invest = st.number_input(f"L'investissement est modélisée par une loi normale de moyenne {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
-                bande_invest = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne de la teneur", 1/10)
-                st.write(f"On considère donc une loi normale de moyenne {moyenne_invest} et d'ecart_type {bande_invest}")
-                
-                arr = np.random.normal(moyenne_invest, bande_invest*moyenne_invest, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
-
-                valeurs.investissement = np.array(n * [np.random.normal(moyenne_invest, bande_invest*moyenne_invest)])
-
-            if loi_invest == "uniform":
-                moyenne_invest = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
-                bande_invest = st.number_input(f"Pourcentage de la bande de l'investissement:", 0.1)
-                st.write(f"On considère donc une loi uniforme centrée sur {moyenne_invest} et de bande {bande_invest}")
-                
-                arr = np.random.uniform(moyenne_invest-moyenne_invest*bande_invest/200, moyenne_invest+moyenne_invest*bande_invest/200, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
-
-                valeurs.investissement = np.array(n * [np.random.normal(moyenne_invest, bande_invest*moyenne_invest)])
-
-            # Fin choix loi investissement
+            if "investissement" not in variables:
+                loi_invest = "uniform"
+                bande_invest = 0
+                moyenne_invest = valeurs.investissement[0]
             
             # Début choix loi coût
-            
-            st.subheader("Loi de probabilité suivie par le coût")
-            loi_cout= st.selectbox("loi du coût", ['triangular', 'normal', 'uniform'])
+            if "coût" in variables :
 
-            if loi_cout == "triangular":
-                moyenne_cout = st.number_input(f"Le cout est modélisé par une loi triangulaire centrée sur la valeur {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
-                bande_cout = st.number_input("Pourcentage de la bande du cout:", 1, 50, 10, 1)
-                st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_cout}M$ et de bande {bande_cout}%')
+                st.subheader("Loi de probabilité suivie par le coût")
+                loi_cout= st.selectbox("loi du coût", ['triangular', 'normal', 'uniform'])
 
-                arr = np.random.triangular(moyenne_cout - moyenne_cout*bande_cout/100, moyenne_cout, moyenne_cout + moyenne_cout*bande_cout/100, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
+                if loi_cout == "triangular":
+                    moyenne_cout = st.number_input(f"Le cout est modélisé par une loi triangulaire centrée sur la valeur {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
+                    bande_cout = st.number_input("Pourcentage de la bande du cout:", 1, 50, 10, 1)
+                    st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_cout}M$ et de bande {bande_cout}%')
 
-                valeurs.cout_tonne_remuee = np.array(n * [np.random.triangular(moyenne_cout - moyenne_cout*bande_cout/100, moyenne_cout, moyenne_cout + moyenne_cout*bande_cout/100)])
+                    arr = np.random.triangular(moyenne_cout - moyenne_cout*bande_cout/100, moyenne_cout, moyenne_cout + moyenne_cout*bande_cout/100, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("coût")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
 
-                
-            if loi_cout == "normal":
-                moyenne_cout = st.number_input(f"L'investissement est modélisée par une loi normale de moyenne {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
-                bande_cout = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne du cout", 1/10)
-                st.write(f"On considère donc une loi normale de moyenne {moyenne_cout} et d'ecart_type {bande_cout}")
-                
-                arr = np.random.normal(moyenne_cout, bande_cout*moyenne_cout, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
+                    valeurs.cout_tonne_remuee = np.array(n * [np.random.triangular(moyenne_cout - moyenne_cout*bande_cout/100, moyenne_cout, moyenne_cout + moyenne_cout*bande_cout/100)])
 
-                valeurs.cout_tonne_remuee = np.array(n * [np.random.normal(moyenne_cout, bande_cout*moyenne_cout)])
+                    
+                if loi_cout == "normal":
+                    moyenne_cout = st.number_input(f"L'investissement est modélisée par une loi normale de moyenne {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
+                    bande_cout = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne du cout", 1/10)
+                    st.write(f"On considère donc une loi normale de moyenne {moyenne_cout} et d'ecart_type {bande_cout}")
+                    
+                    arr = np.random.normal(moyenne_cout, bande_cout*moyenne_cout, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("coût")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
 
-            if loi_cout == "uniform":
-                moyenne_cout = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
-                bande_cout = st.number_input(f"Pourcentage de la bande du cout:", 0.1)
-                st.write(f"On considère donc une loi uniforme centrée sur {moyenne_cout} et de bande {bande_cout}")
-                
-                arr = np.random.uniform(moyenne_cout-moyenne_cout*bande_cout/200, moyenne_cout+moyenne_cout*bande_cout/200, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
+                    valeurs.cout_tonne_remuee = np.array(n * [np.random.normal(moyenne_cout, bande_cout*moyenne_cout)])
 
-                valeurs.cout_tonne_remuee = np.array(n * [np.random.normal(moyenne_cout, bande_cout*moyenne_cout)])
+                if loi_cout == "uniform":
+                    moyenne_cout = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.cout_tonne_remuee[0]}. Possibilité de changer cette valeur:", value = valeurs.cout_tonne_remuee[0])
+                    bande_cout = st.number_input(f"Pourcentage de la bande du cout:", 0.1)
+                    st.write(f"On considère donc une loi uniforme centrée sur {moyenne_cout} et de bande {bande_cout}")
+                    
+                    arr = np.random.uniform(moyenne_cout-moyenne_cout*bande_cout/200, moyenne_cout+moyenne_cout*bande_cout/200, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("coût")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
 
-            # Fin choix loi coût    
+                    valeurs.cout_tonne_remuee = np.array(n * [np.random.normal(moyenne_cout, bande_cout*moyenne_cout)])
+
+                # Fin choix loi coût    
+            if "coût" not in variables:
+                loi_cout = "uniform"
+                bande_cout = 0
+                moyenne_cout = valeurs.cout_tonne_remuee[0]
 
             # Début choix loi teneur
-            st.subheader("Loi de probabilité suivie par la teneur")
-            
-            loi_teneur = st.selectbox("loi de la teneur", ['triangular', 'normal', 'uniform'])
+            if "teneur" in variables:
 
-            if loi_teneur == "triangular":
-                moyenne_teneur = st.number_input(f"La teneur est modélisé par une loi triangulaire centrée sur la valeur {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
-                bande_teneur = st.number_input("Pourcentage de la bande de la teneur:", 1, 50, 10, 1)
-                st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_teneur}M$ et de bande {bande_teneur}%')
-
-                arr = np.random.triangular(moyenne_teneur - moyenne_teneur*bande_teneur/100, moyenne_teneur, moyenne_teneur + moyenne_teneur*bande_teneur/100, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
-
-                valeurs.teneur_minerai_geol = np.array(n * [np.random.triangular(moyenne_teneur - moyenne_teneur*bande_teneur/100, moyenne_teneur, moyenne_teneur + moyenne_teneur*bande_teneur/100)])
+                st.subheader("Loi de probabilité suivie par la teneur")
                 
-                st.write("Les nouvelles valeurs pour la teneur du minerai géologique sont (pour une simulation):", valeurs.investissement)
+                loi_teneur = st.selectbox("loi de la teneur", ['triangular', 'normal', 'uniform'])
 
-            if loi_teneur == "normal":
-                moyenne_teneur = st.number_input(f"La teneur est modélisée par une loi normale de moyenne {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
-                bande_teneur = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne de la teneur", 1/10)
-                st.write(f"On considère donc une loi normale de moyenne {moyenne_teneur} et d'ecart_type {bande_teneur}")
-                
-                arr = np.random.normal(moyenne_teneur, bande_teneur*moyenne_teneur, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
+                if loi_teneur == "triangular":
+                    moyenne_teneur = st.number_input(f"La teneur est modélisé par une loi triangulaire centrée sur la valeur {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+                    bande_teneur = st.number_input("Pourcentage de la bande de la teneur:", 1, 50, 10, 1)
+                    st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_teneur}M$ et de bande {bande_teneur}%')
 
-                valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, bande_teneur*moyenne_teneur)])
+                    arr = np.random.triangular(moyenne_teneur - moyenne_teneur*bande_teneur/100, moyenne_teneur, moyenne_teneur + moyenne_teneur*bande_teneur/100, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("teneur")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
 
-            if loi_teneur == "uniform":
-                moyenne_teneur = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
-                bande_teneur = st.number_input(f"Pourcentage de la bande de la teneur:", 0.1)
-                st.write(f"On considère donc une loi uniforme centrée sur {moyenne_teneur} et de bande {bande_teneur}")
-                
-                arr = np.random.uniform(moyenne_teneur-moyenne_teneur*bande_teneur/200, moyenne_teneur+moyenne_teneur*bande_teneur/200, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
+                    valeurs.teneur_minerai_geol = np.array(n * [np.random.triangular(moyenne_teneur - moyenne_teneur*bande_teneur/100, moyenne_teneur, moyenne_teneur + moyenne_teneur*bande_teneur/100)])
+                    
+                    st.write("Les nouvelles valeurs pour la teneur du minerai géologique sont (pour une simulation):", valeurs.investissement)
 
-                valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, bande_teneur*moyenne_teneur)])
+                if loi_teneur == "normal":
+                    moyenne_teneur = st.number_input(f"La teneur est modélisée par une loi normale de moyenne {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+                    bande_teneur = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne de la teneur", 1/10)
+                    st.write(f"On considère donc une loi normale de moyenne {moyenne_teneur} et d'ecart_type {bande_teneur}")
+                    
+                    arr = np.random.normal(moyenne_teneur, bande_teneur*moyenne_teneur, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("teneur")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
 
-            # Fin choix loi teneur
+                    valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, bande_teneur*moyenne_teneur)])
+
+                if loi_teneur == "uniform":
+                    moyenne_teneur = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.teneur_minerai_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+                    bande_teneur = st.number_input(f"Pourcentage de la bande de la teneur:", 0.1)
+                    st.write(f"On considère donc une loi uniforme centrée sur {moyenne_teneur} et de bande {bande_teneur}")
+                    
+                    arr = np.random.uniform(moyenne_teneur-moyenne_teneur*bande_teneur/200, moyenne_teneur+moyenne_teneur*bande_teneur/200, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("teneur")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
+
+                    valeurs.teneur_minerai_geol = np.array(n * [np.random.normal(moyenne_teneur, bande_teneur*moyenne_teneur)])
+
+                # Fin choix loi teneur
+            if "teneur" not in variables:
+                loi_teneur = "uniform"
+                bande_teneur = 0
+                moyenne_teneur = valeurs.teneur_minerai_geol[0]
             
             # Début choix loi tonnage
-            
-            st.subheader("Loi de probabilité suivie par le tonnage")
 
-            loi_tonnage = st.selectbox("loi du tonnage", ['triangular', 'normal', 'uniform'])
-
-            if loi_tonnage == "triangular":
-                moyenne_tonnage = st.number_input(f"Le tonnage est modélisé par une loi triangulaire centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
-                bande_tonnage = st.number_input("Pourcentage de la bande du tonnage:", 1, 50, 10, 1)
-                st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_tonnage}M$ et de bande {bande_tonnage}%')
-
-                arr = np.random.triangular(moyenne_tonnage - moyenne_tonnage*bande_tonnage/100, moyenne_tonnage, moyenne_tonnage + moyenne_tonnage*bande_tonnage/100, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
-
-                valeurs.tonnage_geol = np.array(n * [np.random.triangular(moyenne_tonnage - moyenne_tonnage*bande_tonnage/100, moyenne_tonnage, moyenne_tonnage + moyenne_tonnage*bande_tonnage/100)])
+            if "tonnage" in variables:
                 
+                st.subheader("Loi de probabilité suivie par le tonnage")
 
-            if loi_tonnage == "normal":
-                moyenne_tonnage = st.number_input(f"Le tonnage est modélisée par une loi normale de moyenne {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
-                bande_tonnage = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne du tonnage", 1/10)
-                st.write(f"On considère donc une loi normale de moyenne {moyenne_tonnage} et d'ecart_type {bande_tonnage}")
-                
-                arr = np.random.normal(moyenne_tonnage, bande_tonnage*moyenne_tonnage, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
+                loi_tonnage = st.selectbox("loi du tonnage", ['triangular', 'normal', 'uniform'])
 
-                valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, bande_tonnage*moyenne_tonnage)])
+                if loi_tonnage == "triangular":
+                    moyenne_tonnage = st.number_input(f"Le tonnage est modélisé par une loi triangulaire centrée sur la valeur {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.investissement[0])
+                    bande_tonnage = st.number_input("Pourcentage de la bande du tonnage:", 1, 50, 10, 1)
+                    st.write(f'On considère donc une loi triangulaire centrée sur {moyenne_tonnage}M$ et de bande {bande_tonnage}%')
 
-            if loi_tonnage == "uniform":
-                moyenne_tonnage = st.number_input(f"Le tonnage est modélisée par une loi uniforme centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
-                bande_tonnage = st.number_input(f"Pourcentage de la bande du tonnage:", 0.1)
-                st.write(f"On considère donc une loi uniforme centrée sur {moyenne_tonnage} et de bande {bande_tonnage}")
-                
-                arr = np.random.uniform(moyenne_tonnage-moyenne_tonnage*bande_tonnage/200, moyenne_tonnage+moyenne_tonnage*bande_tonnage/200, size=10000)
-                fig, ax = plt.subplots()
-                ax.hist(arr, bins=200)
-                st.pyplot(fig)
+                    arr = np.random.triangular(moyenne_tonnage - moyenne_tonnage*bande_tonnage/100, moyenne_tonnage, moyenne_tonnage + moyenne_tonnage*bande_tonnage/100, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("tonnage")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
 
-                valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, bande_tonnage*moyenne_tonnage)])
+                    valeurs.tonnage_geol = np.array(n * [np.random.triangular(moyenne_tonnage - moyenne_tonnage*bande_tonnage/100, moyenne_tonnage, moyenne_tonnage + moyenne_tonnage*bande_tonnage/100)])
+                    
 
-            # Fin choix loi tonnage
+                if loi_tonnage == "normal":
+                    moyenne_tonnage = st.number_input(f"Le tonnage est modélisée par une loi normale de moyenne {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+                    bande_tonnage = st.number_input(f"... et d'écart-type 1/10*la valeur moyenne du tonnage", 1/10)
+                    st.write(f"On considère donc une loi normale de moyenne {moyenne_tonnage} et d'ecart_type {bande_tonnage}")
+                    
+                    arr = np.random.normal(moyenne_tonnage, bande_tonnage*moyenne_tonnage, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("tonnage")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
+
+                    valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, bande_tonnage*moyenne_tonnage)])
+
+                if loi_tonnage == "uniform":
+                    moyenne_tonnage = st.number_input(f"Le tonnage est modélisée par une loi uniforme centrée sur la valeur {valeurs.tonnage_geol[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
+                    bande_tonnage = st.number_input(f"Pourcentage de la bande du tonnage:", 0.1)
+                    st.write(f"On considère donc une loi uniforme centrée sur {moyenne_tonnage} et de bande {bande_tonnage}")
+                    
+                    arr = np.random.uniform(moyenne_tonnage-moyenne_tonnage*bande_tonnage/200, moyenne_tonnage+moyenne_tonnage*bande_tonnage/200, size=10000)
+                    fig, ax = plt.subplots()
+                    ax.hist(arr, bins=200)
+                    plt.xlabel("tonnage")
+                    plt.ylabel("nombre d'occurences lors de la simulation")
+                    plt.legend()
+                    st.pyplot(fig)
+
+                    valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, bande_tonnage*moyenne_tonnage)])
+
+                # Fin choix loi tonnage
+            if "tonnage" not in variables:
+                loi_tonnage = "uniform"
+                bande_tonnage = 0
+                moyenne_tonnage = valeurs.tonnage_geol[0]
+
+            # Debut du choix du prix de l'or:
+
+        st.subheader("Loi de probabilité suivie par le prix de l'or")
+
+        loi_prix_or = st.selectbox("loi du prix de l'or", ['modele de Heath-Jarrow-Morton', 'constante'])
+
+        if loi_prix_or == "modele de Heath-Jarrow-Morton":
+            prix_or_init = st.number_input(f"Le prix de l'or est modélisé par le modele de Heath-Jarrow-Morton partant de la valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
+            Alpha = st.number_input("Paramètre exponentiel du model:", 0.1, 0.3, 0.2, 0.01)
+            Sigma = st.number_input("Ecart type du prix de l'or:", 0.05, 0.15, 0.1, 0.01)
+
+            st.write("voici un exemple d'une suite possible des valeurs du prix de l'or selon ce modèle")
+
+            arr = np.array(prix(prix_or_init, n, 12, alpha=Alpha,sigma=Sigma))
+            fig, ax = plt.subplots()
+            ax.plot(arr, 'o')
+            plt.style.use('seaborn')
+            st.pyplot(fig)
+
+
+            valeurs.prix_or = np.array(prix(prix_or_init, n, 12, alpha=Alpha,sigma=Sigma))
+
+        if loi_prix_or == "constante":
+            prix_or_init = st.number_input(f"Le prix de l'or est considéré constant de valeur {valeurs.prix_or[0]}. Possibilité de changer cette valeur:", value = valeurs.prix_or[0])
+            valeurs.prix_or = np.array(n * [prix_or_init])
+        
+        #Fin du choix du prix de l'or
+
 
             # On trace la sortie voulue du client
 
@@ -298,7 +385,7 @@ def app():
             
             while i < nb_simu:
                 i+=1
-                valeurs.investissement += loi_func(loi_invest, moyenne_invest, bande_invest, n)
+                valeurs.investissement += loi_func(loi_invest, moyenne_invest, bande_invest, n, bool = False)
                 valeurs.cout_tonne_remuee += loi_func(loi_cout, moyenne_cout, bande_cout, n)
                 valeurs.tonnage_geol += loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
                 valeurs.teneur_minerai_geol += loi_func(loi_teneur, moyenne_teneur, bande_teneur, n)
@@ -342,7 +429,7 @@ def app():
             tri_simu = np.zeros(nb_simu)
 
             while i < nb_simu:
-                valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n)
+                valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n, bool = False)
                 valeurs.cout_tonne_remuee = loi_func(loi_cout, moyenne_cout, bande_cout, n)
                 valeurs.tonnage_geol = loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
                 valeurs.teneur_minerai_geol = loi_func(loi_teneur, moyenne_teneur, bande_teneur, n)
@@ -375,7 +462,7 @@ def app():
             van_simu = np.zeros(nb_simu)
 
             while i < nb_simu:
-                valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n)
+                valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n, bool = False)
                 valeurs.cout_tonne_remuee = loi_func(loi_cout, moyenne_cout, bande_cout, n)
                 valeurs.tonnage_geol = loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
                 valeurs.teneur_minerai_geol = loi_func(loi_teneur, moyenne_teneur, bande_teneur, n)
@@ -419,21 +506,22 @@ def app():
         
         st.subheader("Données d'entrée")
         valeurs.n = annees
-        valeurs.investissement = np.array([st.number_input('investissement',value = 270)]+(valeurs.n-1)*[0])
-        valeurs.cout_tonne_remuee = np.array([st.number_input('cout_tonne_remuee',value = 4)]*valeurs.n,)
-        valeurs.ratio_sterile = np.array([st.number_input('ratio_sterile',value = 4)]*valeurs.n)
-        valeurs.cout_traitement = np.array([st.number_input('cout_traitement',value = 15)]*valeurs.n)
-        valeurs.charges_fixes = np.array([st.number_input('charges_fixes',value = 18)]*valeurs.n)
-        valeurs.prix_or = np.array([st.number_input('prix_or',value = 1400)]*valeurs.n)
-        valeurs.taux_recuperation_or = np.array([st.number_input('taux_recuperation_or',value = 95)]*valeurs.n)
-        valeurs.prop_or_paye_dore = np.array([st.number_input('prop_or_paye_dore',value = 98)]*valeurs.n)
-        valeurs.nombre_grammes_once = np.array([st.number_input('nombre_grammes_once',value = 31)]*valeurs.n)
-        valeurs.taux_actualisation = np.array([st.number_input('taux_actualisation',value = 5)]*valeurs.n)
-        valeurs.tonnage_geol = np.array([st.number_input('tonnage_geol',value = 11)]*valeurs.n)
-        valeurs.teneur_minerai_geol = np.array([st.number_input('teneur_minerai_geol',value = 3)]*valeurs.n)
-        valeurs.taux_recup = np.array([st.number_input('taux_recup',value = 95)]*valeurs.n)
-        valeurs.dilution_minerai = np.array([st.number_input('dilution_minerai',value = 15)]*valeurs.n)
-        valeurs.rythme_prod_annee = np.array([st.number_input('rythme_prod_annee',value = 0.8)]*valeurs.n)
+        valeurs.investissement = np.array([st.number_input('investissement',270)]*valeurs.n)
+        valeurs.investissement[1:] = 0
+        valeurs.cout_tonne_remuee = np.array([st.number_input('cout_tonne_remuee',4)]*valeurs.n,)
+        valeurs.ratio_sterile = np.array([st.number_input('ratio_sterile',4)]*valeurs.n)
+        valeurs.cout_traitement = np.array([st.number_input('cout_traitement',15)]*valeurs.n)
+        valeurs.charges_fixes = np.array([st.number_input('charges_fixes',18)]*valeurs.n)
+        valeurs.prix_or = np.array([st.number_input('prix_or',1400)]*valeurs.n)
+        valeurs.taux_recuperation_or = np.array([st.number_input('taux_recuperation_or',95)]*valeurs.n)
+        valeurs.prop_or_paye_dore = np.array([st.number_input('prop_or_paye_dore',98)]*valeurs.n)
+        valeurs.nombre_grammes_once = np.array([st.number_input('nombre_grammes_once',31)]*valeurs.n)
+        valeurs.taux_actualisation = np.array([st.number_input('taux_actualisation',5)]*valeurs.n)
+        valeurs.tonnage_geol = np.array([st.number_input('tonnage_geol',11)]*valeurs.n)
+        valeurs.teneur_minerai_geol = np.array([st.number_input('teneur_minerai_geol',3)]*valeurs.n)
+        valeurs.taux_recup = np.array([st.number_input('taux_recup',95)]*valeurs.n)
+        valeurs.dilution_minerai = np.array([st.number_input('dilution_minerai',15)]*valeurs.n)
+        valeurs.rythme_prod_annee = np.array([st.number_input('rythme_prod_annee',0.8)]*valeurs.n)
         for j in range(0,int(valeurs.premiere_annee_prod[0])):
             valeurs.rythme_prod_annee[j]=0
         retour = np.zeros(valeurs.n)
@@ -449,19 +537,6 @@ def app():
             for i in range(k,valeurs.n):
                 retour[i]=0
                 valeurs.rythme_prod_annee[i]=0
-
-        download=st.button('Télécharger les variables sous forme de .csv')
-
-        if download:
-            df = pd.read_csv("donnees_entree_proj_minier.csv",sep=';')
-            older = [11,3,95,15,12.02,2.61,0.8,270,4,4,20,15,18,1400,95,98,2.43,31,109.68,5]
-            new = [valeurs.tonnage_geol[0],valeurs.teneur_minerai_geol[0],valeurs.taux_recup[0],valeurs.dilution_minerai[0],valeurs.tonnage_industriel()[0],valeurs.teneur_minerai_industriel()[0],valeurs.rythme_prod_annee[0],valeurs.investissement[0],valeurs.cout_tonne_remuee[0],valeurs.ratio_sterile[0],valeurs.cout_exploitation_tonne_minerai()[0],valeurs.cout_traitement[0],valeurs.charges_fixes[0],valeurs.prix_or[0],valeurs.taux_recuperation_or[0],valeurs.prop_or_paye_dore[0],valeurs.qte_or_paye()[0],valeurs.nombre_grammes_once[0],valeurs.recette_tonne_minerai()[0],valeurs.taux_actualisation[0]]
-            df["valeur"]=df["valeur"].replace(older,new)
-            
-            fichiercsv = df.to_csv(index=False,sep=";")
-            b64 = base64.b64encode(fichiercsv.encode()).decode()  # some strings
-            linko= f'<a href="data:file/csv;base64,{b64}" download="myfilename.csv">Download csv file</a>'
-            st.markdown(linko, unsafe_allow_html=True)
 
         
         valeurs_non_modif = deepcopy(valeurs)
@@ -487,7 +562,7 @@ def app():
             st.pyplot(fig)
 
             valeurs.investissement = np.array(n * [np.random.triangular(moyenne_invest - moyenne_invest*bande_invest/100, moyenne_invest, moyenne_invest + moyenne_invest*bande_invest/100)])
-        
+            valeurs.investissement[1:] = 0
 
         if loi_invest == "normal":
             moyenne_invest = st.number_input(f"L'investissement est modélisée par une loi normale de moyenne {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
@@ -500,6 +575,7 @@ def app():
             st.pyplot(fig)
 
             valeurs.investissement = np.array(n * [np.random.normal(moyenne_invest, bande_invest*moyenne_invest)])
+            valeurs.investissement[1:] = 0
 
         if loi_invest == "uniform":
             moyenne_invest = st.number_input(f"L'investissement est modélisée par une loi uniforme centrée sur la valeur {valeurs.investissement[0]}. Possibilité de changer cette valeur:", value = valeurs.teneur_minerai_geol[0])
@@ -512,6 +588,7 @@ def app():
             st.pyplot(fig)
 
             valeurs.investissement = np.array(n * [np.random.normal(moyenne_invest, bande_invest*moyenne_invest)])
+            valeurs.investissement[1:] = 0
 
         # Fin choix loi investissement
         
@@ -648,8 +725,7 @@ def app():
             valeurs.tonnage_geol = np.array(n * [np.random.normal(moyenne_tonnage, bande_tonnage*moyenne_tonnage)])
 
         # Fin choix loi tonnage
-        
-        # Debut du choix du prix de l'or:
+         # Debut du choix du prix de l'or:
 
         st.subheader("Loi de probabilité suivie par le prix de l'or")
 
@@ -676,7 +752,6 @@ def app():
             valeurs.prix_or = np.array(n * [prix_or_init])
         
         #Fin du choix du prix de l'or
-
 
 
         # On trace la sortie voulue du client
@@ -715,6 +790,7 @@ def app():
         while i < nb_simu:
             i+=1
             valeurs.investissement += loi_func(loi_invest, moyenne_invest, bande_invest, n)
+            valeurs.investissement[1:] = 0
             valeurs.cout_tonne_remuee += loi_func(loi_cout, moyenne_cout, bande_cout, n)
             valeurs.tonnage_geol += loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
             valeurs.teneur_minerai_geol += loi_func(loi_teneur, moyenne_teneur, bande_teneur, n)
@@ -751,7 +827,7 @@ def app():
         st.header('Statistiques de rentabilité interne')
 
         tri_goal = st.number_input("Objectif de TRI", 0.005, 0.5, 0.05, 0.005)
-        annee = st.number_input("A l'année:", step = 1, min_value = 1, max_value = 30, value = 10)
+        annee = st.number_input("A l'année:", 1, 15, 15, 1)
 
         i = 0
         iter_tri = 0
@@ -759,6 +835,7 @@ def app():
 
         while i < nb_simu:
             valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n)
+            valeurs.investissement[1:] = 0
             valeurs.cout_tonne_remuee = loi_func(loi_cout, moyenne_cout, bande_cout, n)
             valeurs.tonnage_geol = loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
             valeurs.teneur_minerai_geol = loi_func(loi_teneur, moyenne_teneur, bande_teneur, n)
@@ -786,12 +863,13 @@ def app():
 
         i = 0
         iter_van = 0
-        annee = st.number_input("Caculons la probabilité que l'investissement ne soit pas rentable à l'année:",  value = 15, max_value = 30, min_value = 1, step =1)
+        annee = st.number_input("Caculons la probabilité que l'investissement ne soit pas rentable à l'année:", 1, 15, 15, 1)
         esperance_perte = 0
         van_simu = np.zeros(nb_simu)
 
         while i < nb_simu:
             valeurs.investissement = loi_func(loi_invest, moyenne_invest, bande_invest, n)
+            valeurs.investissement[1:] = 0
             valeurs.cout_tonne_remuee = loi_func(loi_cout, moyenne_cout, bande_cout, n)
             valeurs.tonnage_geol = loi_func(loi_tonnage, moyenne_tonnage, bande_tonnage, n)
             valeurs.teneur_minerai_geol = loi_func(loi_teneur, moyenne_teneur, bande_teneur, n)
@@ -809,7 +887,7 @@ def app():
         # Affichage de la répartition du van
 
         fig, ax = plt.subplots()
-        ax.hist(van_simu, 70, density = True, stacked = True)
+        ax.hist(van_simu, 25)
         plt.title(f"Répartition des valeurs du VAN à l'année {annee}")
         st.pyplot(fig)
 
