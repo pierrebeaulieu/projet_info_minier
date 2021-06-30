@@ -486,7 +486,7 @@ def app():
 
             st.write(f"La probabilité que le VAN soit négatif à l'année {annee} vaut {iter_van :.2f}")
 
-            st.write(f"De plus, l'espérance de perte à l'année {annee} vaut {esperance_perte :.2f }M$")
+            st.write(f"De plus, l'espérance de perte à l'année {annee} vaut {esperance_perte :.2f}M$")
 
 
     else :
